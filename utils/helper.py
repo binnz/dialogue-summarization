@@ -131,7 +131,7 @@ def convert_src_feature(example, max_seq_length_src, tokenizer):
 
 
 def convert_tgt_feature(example, max_seq_length_tgt, tokenizer):
-    tokens = tokenizer.tokenize(example)
+    tokens = tokenizer.tokenize(str(example))
     if len(tokens) > max_seq_length_tgt - 2:
         tokens = tokens[0:(max_seq_length_tgt - 2)]
 
