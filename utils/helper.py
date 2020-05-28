@@ -101,6 +101,9 @@ def make_train_data_from_txt(config, tokenizer):
                 utterances_type.append(utter_type)
             elif valid_utter is not None or utter_type is not None:
                 print("Error data sample {}.{}.{}".format(qid, qa, dialogue))
+
+        if len(utterances) == 0:
+            continue
         input_src_ids = []
         input_src_mask = []
         for utter in utterances:
@@ -108,7 +111,7 @@ def make_train_data_from_txt(config, tokenizer):
             input_src_ids.append(ids_src)
             input_src_mask.append(mask_src)
         if not isinstance(report, six.string_types):
-            print("Error Report sample QID is {}.report{}".format(qid,str(report)))
+            print("Error Report sample QID is {}.report{}".format(qid, str(report)))
             continue
         target_ids = convert_tgt_feature(report, max_seq_length_src, tokenizer)
         features = collections.OrderedDict()
