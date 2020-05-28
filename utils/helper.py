@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import pickle
 import collections
-
+import six
 
 def seed_everything(seed):
     random.seed(seed)
@@ -83,6 +83,9 @@ def make_train_data_from_txt(config, tokenizer):
         if qa:
             utterances.append(qa)
             utterances_type.append(1)
+        if not isinstance(dialogue, six.string_types):
+            dialogue = str(dialogue)
+            print("Float Dialogue QID{}, text{}".format(qid, dialogue))
         dialogue = dialogue.split('|')
         for utter in dialogue:
             valid_utter, utter_type = clear_sentence(utter)
@@ -101,6 +104,7 @@ def make_train_data_from_txt(config, tokenizer):
         features["input_src_mask"] = input_src_mask
         features["utterances_type"] = utterances_type
         features["target_ids"] = target_ids
+        features["QID"] = qid
         result.append(features)
     with open(f'{config.pickle_path}', 'wb') as f:
         pickle.dump(result, f)
