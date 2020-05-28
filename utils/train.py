@@ -33,3 +33,4 @@ def one_cycle(epoch, config, model, optimizer, criterion, data_loader,
         'opt': optimizer.state_dict()
     }, f'{config.data_dir}/{config.fn}_{epoch}.pth')
     print('*** Saved Model ***')
+    print("epoch {} finish".format(epoch))

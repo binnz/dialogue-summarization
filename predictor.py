@@ -32,12 +32,15 @@ if __name__ == '__main__':
     model.eval()
     print('*** Start Evaluate ***')
     prediction = []
-    qid = []
+    qids = []
+    total_nums = len(data_loader)
     for i, data in enumerate(data_loader):
         batch = Batch(data, device, mode='eval', pad=tokenizer.pad_token_id)
         text, qid = evaluate(Config, batch, tokenizer, model, device)
         prediction.append(text)
-        prediction.append(qid)
-    dataFrame = pd.DataFrame({'QID': qid, 'Prediction': prediction})
+        qids.append(qid)
+        print("predict finish. QID is {}".format(qid))
+    dataFrame = pd.DataFrame({'QID': qids, 'Prediction': prediction})
 
     dataFrame.to_csv(f'{Config.data_dir}/{Config.predict_output}.csv', index=True, sep=',')
+    print("evaluate success. total num:{}".format(total_nums))

@@ -2,10 +2,10 @@ import torch
 from torch import nn
 from transformers import BertModel
 from transformer_encoder import TransformerEncoder
-from transformer_decoder import TransformerDecoder
 from decoder import build_decoder
 from neural import PositionalEncoding
 from generator import Generator
+
 
 def build_model(config):
     model = DialogueSummarization(
@@ -96,10 +96,6 @@ class DialogueSummarization(nn.Module):
 
     def generate(self, x):
         return self.generator(x)
-
-    def freeze_token_encoder(self):
-        for p in self.token_encoder.parameters():
-            p.requires_grad = False
 
     def freeze(self):
         for p in self.parameters():

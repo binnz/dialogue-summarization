@@ -40,6 +40,7 @@ if __name__ == '__main__':
     logging.info('Define Models')
     model = build_model(Config).to(device)
     model.unfreeze()
+    # model.freeze_bert()
 
     logging.info('Define Loss and Optimizer')
     criterion = nn.CrossEntropyLoss(reduction='none')
