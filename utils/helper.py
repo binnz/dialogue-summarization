@@ -41,6 +41,9 @@ def make_predict_data_from_txt(config, tokenizer):
         if qa:
             utterances.append(qa)
             utterances_type.append(1)
+        if not isinstance(dialogue, six.string_types):
+            dialogue = str(dialogue)
+            print("Float Dialogue QID{}, text{}".format(qid, dialogue))
         dialogue = dialogue.split('|')
         for utter in dialogue:
             valid_utter, utter_type = clear_sentence(utter)
@@ -135,7 +138,10 @@ def convert_src_feature(example, max_seq_length_src, tokenizer):
 
 
 def convert_tgt_feature(example, max_seq_length_tgt, tokenizer):
-    tokens = tokenizer.tokenize(str(example))
+    if not isinstance(example, six.string_types):
+        example = str(example)
+        print("Float report{}".format(example))
+    tokens = tokenizer.tokenize(example)
     if len(tokens) > max_seq_length_tgt - 2:
         tokens = tokens[0:(max_seq_length_tgt - 2)]
 
