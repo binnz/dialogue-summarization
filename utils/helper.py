@@ -99,8 +99,8 @@ def make_train_data_from_txt(config, tokenizer):
             if valid_utter is not None and utter_type is not None:
                 utterances.append(valid_utter)
                 utterances_type.append(utter_type)
-            else:
-                print("Error data sample {}.{}.{}".format(qid,qa,dialogue))
+            elif valid_utter is not None or utter_type is not None:
+                print("Error data sample {}.{}.{}".format(qid, qa, dialogue))
         input_src_ids = []
         input_src_mask = []
         for utter in utterances:
