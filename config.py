@@ -17,10 +17,10 @@ class Config:
 
     # train
     seed = 123
-    device = 'cpu'
+    device = 'cuda'
     use_pickle = False
-    data_dir = './data-dev'
-    train_data_path = f'{data_dir}/test.csv'
+    data_dir = './data'
+    train_data_path = f'{data_dir}/AutoMaster_TrainSet.csv'
     predict_data_path = f'{data_dir}/AutoMaster_TestSet.csv'
     predict_output = 'prediction_result'
     lr = 1e-3
@@ -29,4 +29,4 @@ class Config:
     pickle_path = f'{data_dir}/train_data.pkl'
     predict_pickle_path = f'{data_dir}/predict_data.pkl'
     betas = (0.9, 0.98)
-    batch_size = 4
+    batch_size = 128
