@@ -104,6 +104,7 @@ def make_train_data_from_txt(config, tokenizer):
         features["input_src_mask"] = input_src_mask
         features["utterances_type"] = utterances_type
         features["target_ids"] = target_ids
+        features["QID"] = qid
         result.append(features)
     with open(f'{config.pickle_path}', 'wb') as f:
         pickle.dump(result, f)
