@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import pickle
 import collections
-
+import six
 
 def seed_everything(seed):
     random.seed(seed)
@@ -83,6 +83,9 @@ def make_train_data_from_txt(config, tokenizer):
         if qa:
             utterances.append(qa)
             utterances_type.append(1)
+        if not isinstance(dialogue, six.string_types):
+            dialogue = str(dialogue)
+            print("Float Dialogue QID{}, text{}".format(qid, dialogue))
         dialogue = dialogue.split('|')
         for utter in dialogue:
             valid_utter, utter_type = clear_sentence(utter)
@@ -131,6 +134,8 @@ def convert_src_feature(example, max_seq_length_src, tokenizer):
 
 
 def convert_tgt_feature(example, max_seq_length_tgt, tokenizer):
+    if not isinstance(example, six.string_types):
+        example = str(example)
     tokens = tokenizer.tokenize(example)
     if len(tokens) > max_seq_length_tgt - 2:
         tokens = tokens[0:(max_seq_length_tgt - 2)]
