@@ -40,13 +40,14 @@ def make_predict_data_from_txt(config, tokenizer):
         qa, _ = clear_sentence(qa)
         if qa:
             utterances.append(qa)
-            utterances_type.append(1)
+            utterances_type.append(0)
         if not isinstance(dialogue, six.string_types):
             dialogue = str(dialogue)
             print("Float Dialogue QID{}, text{}".format(qid, dialogue))
         dialogue = dialogue.split('|')
         for utter in dialogue:
             valid_utter, utter_type = clear_sentence(utter)
+            assert utter_type is not None
             if valid_utter:
                 utterances.append(valid_utter)
                 utterances_type.append(utter_type)
@@ -85,13 +86,17 @@ def make_train_data_from_txt(config, tokenizer):
         qa, _ = clear_sentence(qa)
         if qa:
             utterances.append(qa)
-            utterances_type.append(1)
+            utterances_type.append(0)
         if not isinstance(dialogue, six.string_types):
             dialogue = str(dialogue)
             print("Float Dialogue QID{}, text{}".format(qid, dialogue))
-        dialogue = dialogue.split('|')
+            dialogue = dialogue.split('|')
+            print("After str Float Dialogue QID{}, text{}".format(qid, dialogue))
+        else:
+            dialogue = dialogue.split('|')
         for utter in dialogue:
             valid_utter, utter_type = clear_sentence(utter)
+            assert utter_type is not None
             if valid_utter:
                 utterances.append(valid_utter)
                 utterances_type.append(utter_type)
@@ -141,7 +146,10 @@ def convert_tgt_feature(example, max_seq_length_tgt, tokenizer):
     if not isinstance(example, six.string_types):
         example = str(example)
         print("Float report{}".format(example))
-    tokens = tokenizer.tokenize(example)
+        tokens = tokenizer.tokenize(example)
+        print("After str Float report tokens{}".format(tokens))
+    else:
+        tokens = tokenizer.tokenize(example)
     if len(tokens) > max_seq_length_tgt - 2:
         tokens = tokens[0:(max_seq_length_tgt - 2)]
 

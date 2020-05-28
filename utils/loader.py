@@ -6,7 +6,7 @@ from config import Config
 
 class BalancedDataLoader(BatchSampler):
 
-    def __init__(self, data: Dataset, pad_id: int, mode = 'train'):
+    def __init__(self, data: Dataset, pad_id: int, mode='train'):
         if mode == 'train':
             super().__init__(RandomSampler(data), Config.batch_size, True)
         else:
