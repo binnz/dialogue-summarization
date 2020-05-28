@@ -24,7 +24,7 @@ if __name__ == '__main__':
         with open(f'{Config.predict_pickle_path}', 'wb') as f:
             pickle.dump(predict_data, f)
     dataSet = DialogDataset(predict_data, tokenizer)
-    data_loader = BalancedDataLoader(dataSet, tokenizer.pad_token_id)
+    data_loader = BalancedDataLoader(dataSet, tokenizer.pad_token_id, 'predict')
 
     model = build_model(Config).to(device)
     state_dict = torch.load(f'{Config.data_dir}/{Config.fn}_{epoch}.pth')
