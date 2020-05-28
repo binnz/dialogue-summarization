@@ -107,6 +107,9 @@ def make_train_data_from_txt(config, tokenizer):
             ids_src, mask_src = convert_src_feature(utter, max_seq_length_src, tokenizer)
             input_src_ids.append(ids_src)
             input_src_mask.append(mask_src)
+        if not isinstance(report, six.string_types):
+            print("Error Report sample QID is {}.report{}".format(qid,str(report)))
+            continue
         target_ids = convert_tgt_feature(report, max_seq_length_src, tokenizer)
         features = collections.OrderedDict()
         features["input_src_ids"] = input_src_ids
