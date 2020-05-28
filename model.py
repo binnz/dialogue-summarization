@@ -56,8 +56,9 @@ class DialogueSummarization(nn.Module):
         utter_length, batch_size, _ = source.size()
         utterance_input_mask = [
             [1 if any(i) else 0 for i in j]for j in source_mask]
+        device = source_mask.device
         utterance_input_mask = torch.tensor(
-            utterance_input_mask).transpose(0, 1)
+            utterance_input_mask).transpose(0, 1).to(device)
         utterance_features = []
         for utter_index in range(utter_length):
             out, _ = self.token_encoder(
@@ -77,8 +78,9 @@ class DialogueSummarization(nn.Module):
         utter_length, batch_size, _ = source.size()
         utterance_input_mask = [
             [1 if any(i) else 0 for i in j]for j in source_mask]
+        device = source_mask.device
         utterance_input_mask = torch.tensor(
-            utterance_input_mask).transpose(0, 1)
+            utterance_input_mask).transpose(0, 1).to(device)
         utterance_features = []
         for utter_index in range(utter_length):
             out, _ = self.token_encoder(
