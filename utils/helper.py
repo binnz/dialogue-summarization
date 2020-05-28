@@ -86,14 +86,15 @@ def make_train_data_from_txt(config, tokenizer):
         if qa:
             utterances.append(qa)
             utterances_type.append(0)
+
         if not isinstance(dialogue, six.string_types):
             dialogue = str(dialogue)
             print("Float Dialogue QID{}, text{}".format(qid, dialogue))
-            dialogue = dialogue.split('|')
             print("After str Float Dialogue QID{}, text{}".format(qid, dialogue))
-        else:
-            dialogue = dialogue.split('|')
-        for utter in dialogue:
+            continue
+
+        valid_dialogue = dialogue.split('|')
+        for utter in valid_dialogue:
             valid_utter, utter_type = clear_sentence(utter)
             if valid_utter is not None and utter_type is not None:
                 utterances.append(valid_utter)
