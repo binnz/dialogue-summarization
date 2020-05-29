@@ -1,9 +1,9 @@
 class Config:
-    pretrained_model_name_or_path = 'bert-base-chinese'
+    pretrained_model_name_or_path = 'hfl/rbtl3'
 
     # model params
-    num_epoch = 5
-    dim_model = 768
+    num_epoch = 1
+    dim_model = 1024
     num_heads = 12
     dim_ff = 1024
     dropout = 0.1
@@ -19,11 +19,11 @@ class Config:
     seed = 123
     device = 'cpu'
     use_pickle = True
-    data_dir = './data-dev'
+    data_dir = './data'
     train_data_path = f'{data_dir}/AutoMaster_TrainSet.csv'
     predict_data_path = f'{data_dir}/AutoMaster_TestSet.csv'
     predict_output = 'prediction_result'
-    lr = 1e-3
+    lr = 1e-5
     fn = 'ckpt'
     load = False
     pickle_path = f'{data_dir}/train_data.pkl'

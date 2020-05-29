@@ -46,7 +46,7 @@ class DecoderLayer(nn.Module):
 
     def forward(self, x, mem, source_mask, target_mask):
         # self attention
-        source_mask = source_mask[:, :128]
+        source_mask = source_mask[:, :, :128]
         x = self.self_attn(x, target_mask)
         # source target attention
         x = self.st_attn(mem, x, source_mask)

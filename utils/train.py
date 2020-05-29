@@ -10,10 +10,11 @@ def one_cycle(epoch, config, model, optimizer, criterion, data_loader,
     model.train()
     with tqdm(total=len(data_loader), desc=f'Epoch: {epoch + 1}') as pbar:
         for i, data in enumerate(data_loader):
-            optimizer.zero_grad()
             batch = Batch(data, device, pad=tokenizer.pad_token_id)
-            out = model(batch.source, batch.source_mask,
-                        batch.target, batch.target_mask, batch.utter_type)
+            with torch.no_grad():
+                out = model(batch.source, batch.source_mask,
+                            batch.target, batch.target_mask, batch.utter_type)
+            optimizer.zero_grad()
             loss = criterion(out.transpose(1, 2), batch.target_y).mean()
             loss.backward()
             optimizer.step()
