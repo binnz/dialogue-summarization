@@ -215,6 +215,7 @@ class TransformerEncoder(nn.Module):
                  dropout, max_utter_num_length, utter_type, embeddings):
         super(TransformerEncoder, self).__init__()
         self.d_model = d_model
+        self.max_length = max_utter_num_length
         self.num_layers = num_layers
         self.embeddings = embeddings
         self.utterance_emb = nn.Embedding(utter_type, d_model)
@@ -226,6 +227,10 @@ class TransformerEncoder(nn.Module):
 
     def forward(self, src, attention_mask, utter_type, lengths=None):
         """ See :obj:`EncoderBase.forward()`"""
+        src = src[:, :self.max_length, :]
+        attention_mask = attention_mask[:, :self.max_length]
+        utter_type = utter_type[:, :self.max_length]
+
         out = self.pos_emb(src)
         utter_emb = self.utterance_emb(utter_type)
         out = out + utter_emb
