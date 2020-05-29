@@ -3,20 +3,27 @@ from torch.nn.utils import clip_grad_norm_
 from tqdm import tqdm
 from torch.autograd import Variable
 from .batch import Batch
-
+from torch import nn
 
 def one_cycle(epoch, config, model, optimizer, criterion, data_loader,
               tokenizer, device):
+    model.half()
+    for layer in model.modules():
+        if isinstance(layer, nn.BatchNorm2d):
+            layer.float()
     model.train()
     with tqdm(total=len(data_loader), desc=f'Epoch: {epoch + 1}') as pbar:
         for i, data in enumerate(data_loader):
             batch = Batch(data, device, pad=tokenizer.pad_token_id)
             out = model(batch.source, batch.source_mask,
                             batch.target, batch.target_mask, batch.utter_type)
-            optimizer.zero_grad()
+
             loss = criterion(out.transpose(1, 2), batch.target_y).mean()
+            loss = loss / 16
             loss.backward()
-            optimizer.step()
+            if (i + 1) % 16 == 0:
+                optimizer.step()
+                optimizer.zero_grad()
             clip_grad_norm_(model.parameters(), config.max_grad_norm)
             pbar.update(1)
             pbar.set_postfix_str(f'Loss: {loss.item():.5f}')
