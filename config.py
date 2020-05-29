@@ -5,9 +5,9 @@ class Config:
     num_epoch = 5
     dim_model = 768
     num_heads = 12
-    dim_ff = 2048
+    dim_ff = 1024
     dropout = 0.1
-    num_layers = 6
+    num_layers = 3
     max_src_num_length = 128
     max_utter_num_length = 128
     max_decode_output_length = 256
@@ -29,4 +29,4 @@ class Config:
     pickle_path = f'{data_dir}/train_data.pkl'
     predict_pickle_path = f'{data_dir}/predict_data.pkl'
     betas = (0.9, 0.98)
-    batch_size = 128
+    batch_size = 2
