@@ -4,7 +4,7 @@ class Config:
     # model params
     num_epoch = 1
     dim_model = 1024
-    num_heads = 12
+    num_heads = 8
     dim_ff = 1024
     dropout = 0.1
     num_layers = 3
