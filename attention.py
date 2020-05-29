@@ -75,6 +75,8 @@ class MultiHeadAttention(nn.Module):
         # (QK^T)/sqrt(d_k)
         scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
         if mask is not None:
+            print("shape qa")
+            print('scores shape:', scores.shape,'mask shape:', mask.shape)
             scores = scores.masked_fill(mask == 0, -1e9)
         # softmax((QK^T)/sqrt(d_k))
         attn = F.softmax(scores, dim=-1)

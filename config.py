@@ -17,9 +17,9 @@ class Config:
 
     # train
     seed = 123
-    device = 'cuda'
-    use_pickle = False
-    data_dir = './data'
+    device = 'cpu'
+    use_pickle = True
+    data_dir = './data-dev'
     train_data_path = f'{data_dir}/AutoMaster_TrainSet.csv'
     predict_data_path = f'{data_dir}/AutoMaster_TestSet.csv'
     predict_output = 'prediction_result'
