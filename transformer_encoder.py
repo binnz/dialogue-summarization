@@ -235,7 +235,7 @@ class TransformerEncoder(nn.Module):
         utter_emb = self.utterance_emb(utter_type)
         out = out + utter_emb
         for i in range(self.num_layers):
-            out = self.transformer_local[i](out, out, 1 - attention_mask)  # all_sents * max_tokens * dim
+            out = self.transformer_local[i](out, out, ~attention_mask)  # all_sents * max_tokens * dim
         out = self.layer_norm(out)
 
         mask_hier = attention_mask[:, :, None].float()
