@@ -1,9 +1,9 @@
 class Config:
-    pretrained_model_name_or_path = 'hfl/rbtl3'
+    pretrained_model_name_or_path = 'bert-base-chinese'
 
     # model params
     num_epoch = 1
-    dim_model = 1024
+    dim_model = 768
     num_heads = 8
     dim_ff = 1024
     dropout = 0.1

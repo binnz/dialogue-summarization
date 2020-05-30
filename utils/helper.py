@@ -196,3 +196,30 @@ def clear_sentence(sentence):
     if sentence.startswith('[语音]') or sentence.startswith('[图片]'):
         return None, None
     return sentence, utter_type
+
+
+def create_single_sample(qa, dialogue, max_seq_length_src, tokenizer):
+    utterances = []
+    utterances_type = []
+    if qa:
+        utterances.append(qa)
+        utterances_type.append(0)
+
+    if not isinstance(dialogue, six.string_types):
+        return None, None
+
+    valid_dialogue = dialogue.split('|')
+    for utter in valid_dialogue:
+        valid_utter, utter_type = clear_sentence(utter)
+        if valid_utter is not None and utter_type is not None:
+            utterances.append(valid_utter)
+            utterances_type.append(utter_type)
+        elif valid_utter is not None or utter_type is not None:
+            continue
+    input_src_ids = []
+    input_src_mask = []
+    for utter in utterances:
+        ids_src, mask_src = convert_src_feature(utter, max_seq_length_src, tokenizer)
+        input_src_ids.append(ids_src)
+        input_src_mask.append(mask_src)
+    return input_src_ids, input_src_mask, utterances_type

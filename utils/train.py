@@ -7,10 +7,6 @@ from torch import nn
 
 def one_cycle(epoch, config, model, optimizer, criterion, data_loader,
               tokenizer, device):
-    model.half()
-    for layer in model.modules():
-        if isinstance(layer, nn.BatchNorm2d):
-            layer.float()
     model.train()
     with tqdm(total=len(data_loader), desc=f'Epoch: {epoch + 1}') as pbar:
         for i, data in enumerate(data_loader):
