@@ -34,4 +34,4 @@ class Config:
     adam_epsilon = 1e-8
     warmup_steps =0
     local_rank = -1
-    batch_size = 32
+    batch_size = 8

@@ -75,11 +75,8 @@ if __name__ == '__main__':
         optimizer.load_state_dict(state_dict['opt'])
 
     logging.info('Start Training')
-    train_iterator = trange(
-        start_epoch, int(Config.num_train_epochs), desc="Epoch", disable=Config.local_rank not in [-1, 0]
-    )
     print("T total", t_total)
-    for epoch in train_iterator:
+    for epoch in range(start_epoch, Config.num_train_epochs):
         one_cycle(epoch, Config, model, optimizer, scheduler, criterion, data_loader,
               tokenizer, device)
         # evaluate(Config, 'おはよーーー', tokenizer, model, device)
