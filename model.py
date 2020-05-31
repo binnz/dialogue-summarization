@@ -55,7 +55,7 @@ class DialogueSummarization(nn.Module):
     def forward(self, source, source_mask, target, target_mask, utter_type):
         utter_length, batch_size, _ = source.size()
         utterance_input_mask = [
-            [any(i) for i in j]for j in source_mask]
+            [1 if any(i) else 0 for i in j]for j in source_mask]
         device = source_mask.device
         utterance_input_mask = torch.tensor(
             utterance_input_mask).transpose(0, 1).to(device)

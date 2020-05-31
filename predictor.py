@@ -10,6 +10,9 @@ from utils import make_predict_data_from_txt, DialogDataset, BalancedDataLoader,
 
 logging.basicConfig(level=logging.INFO)
 
+"""
+set the batch size to 1
+"""
 if __name__ == '__main__':
     logging.info('*** Initializing Predict Mode ***')
     epoch = 0
