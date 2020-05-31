@@ -20,7 +20,6 @@ def build_model(config):
         config.max_decode_output_length,
         config.vocab_size,
         None)
-    model.freeze_bert()
     return model
 
 
@@ -47,6 +46,16 @@ class DialogueSummarization(nn.Module):
         self.decoder = build_decoder(
             num_layer=num_layers, heads=num_heads, d_model=dim_model, d_ff=dim_ff, drop_rate=dropout)
         self.generator = Generator(dim_model, vocab_size)
+
+        for param in self.utterance_encoder.parameters():
+            if param.dim() > 1:
+                nn.init.xavier_uniform_(param)
+        for param in self.decoder.parameters():
+            if param.dim() > 1:
+                nn.init.xavier_uniform_(param)
+        for param in self.generator.parameters():
+            if param.dim() > 1:
+                nn.init.xavier_uniform_(param)
 
     def token_encode_model(self):
         return self.token_encoder

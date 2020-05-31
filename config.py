@@ -1,6 +1,8 @@
 class Config:
     pretrained_model_name_or_path = 'bert-base-chinese'
 
+    local = False
+    # env = 'prod'
     # model params
     num_train_epochs = 1
     dim_model = 768
@@ -17,21 +19,21 @@ class Config:
 
     # train
     seed = 123
-    device = 'cuda'
+    device = 'cpu' if local else 'cuda'
     use_pickle = True
-    data_dir = './data'
+    data_dir = './data-dev' if local else './data'
     train_data_path = f'{data_dir}/8-1.train.csv'
     predict_data_path = f'{data_dir}/AutoMaster_TestSet.csv'
     predict_output = 'prediction_result'
-    learning_rate = 5e-5
+    learning_rate = 1e-3
     fn = 'ckpt'
     load = False
     pickle_path = f'{data_dir}/train_data.pkl'
     predict_pickle_path = f'{data_dir}/predict_data.pkl'
     betas = (0.9, 0.98)
-    gradient_accumulation_steps = 16
+    gradient_accumulation_steps = 1
     weight_decay = 0.0
     adam_epsilon = 1e-8
-    warmup_steps =0
+    warmup_steps = 0
     local_rank = -1
     batch_size = 8

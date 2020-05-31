@@ -3,10 +3,12 @@ import os
 from torch.nn.utils import clip_grad_norm_
 from tqdm import tqdm
 from .batch import Batch
-import time
+from utils.eval import eval_test
+from utils.helper import qa,dialogue,real_report
 from tensorboard_logger import Logger
 
 logger = Logger(logdir="./tensorboard_logs", flush_secs=10)
+
 
 def one_cycle(epoch, config, model, optimizer, scheduler, criterion, data_loader,
               tokenizer, device):
@@ -39,6 +41,11 @@ def one_cycle(epoch, config, model, optimizer, scheduler, criterion, data_loader
                 'opt': optimizer.state_dict()
             }, f'{config.data_dir}/{config.fn}.pth')
         # not overwrite
+
+            if i % 50 == 0:
+                text = eval_test(config, qa, dialogue, tokenizer, model, device)
+                print('report', text)
+                print("real report", real_report)
     torch.save({
         'epoch': epoch,
         'model': model.state_dict(),
