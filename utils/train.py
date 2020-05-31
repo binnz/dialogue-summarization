@@ -3,26 +3,37 @@ import os
 from torch.nn.utils import clip_grad_norm_
 from tqdm import tqdm
 from .batch import Batch
+import time
 
 def one_cycle(epoch, config, model, optimizer, scheduler, criterion, data_loader,
               tokenizer, device):
     model.train()
+    for p in model.token_encoder.parameters():
+        assert p.requires_grad == False
+    for p in model.decoder.parameters():
+        assert p.requires_grad == True
     with tqdm(total=len(data_loader), desc=f'Epoch: {epoch + 1}') as pbar:
         for i, data in enumerate(data_loader):
+            print("Time 0", time.time())
             batch = Batch(data, device, pad=tokenizer.pad_token_id)
             out = model(batch.source, batch.source_mask,
                             batch.target, batch.target_mask, batch.utter_type)
-
+            print("Input", batch.source)
+            print("Target", batch.target)
+            print("Time 1", time.time())
             loss = criterion(out.transpose(1, 2), batch.target_y).mean()
             loss = loss / config.gradient_accumulation_steps
             loss.backward()
+            print("Loss", loss)
+            print("Time 2", time.time())
             if (i + 1) % config.gradient_accumulation_steps == 0:
-                clip_grad_norm_(model.parameters(), config.max_grad_norm)
+                clip_grad_norm_(filter(lambda p: p.requires_grad, model.parameters()), config.max_grad_norm)
                 optimizer.step()
                 scheduler.step()
                 optimizer.zero_grad()
                 pbar.update(1)
                 pbar.set_postfix_str(f'Loss: {loss.item():.5f}')
+                print("Time 3", time.time())
         # if i % 100 == 0:
         #     torch.cuda.empty_cache()
         # always overwrite f'{config.data_dir}/{config.fn}.pth'
