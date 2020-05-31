@@ -27,11 +27,11 @@ def one_cycle(epoch, config, model, optimizer, scheduler, criterion, data_loader
         #     torch.cuda.empty_cache()
         # always overwrite f'{config.data_dir}/{config.fn}.pth'
         # if i % 10000 == 0:
-        #     torch.save({
-        #         'epoch': epoch,
-        #         'model': model.state_dict(),
-        #         'opt': optimizer.state_dict()
-        #     }, f'{config.data_dir}/{config.fn}.pth')
+            torch.save({
+                'epoch': epoch,
+                'model': model.state_dict(),
+                'opt': optimizer.state_dict()
+            }, f'{config.data_dir}/{config.fn}.pth')
         # not overwrite
     torch.save({
         'epoch': epoch,
