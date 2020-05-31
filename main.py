@@ -78,6 +78,7 @@ if __name__ == '__main__':
     train_iterator = trange(
         start_epoch, int(Config.num_train_epochs), desc="Epoch", disable=Config.local_rank not in [-1, 0]
     )
+    print("T total", t_total)
     for epoch in train_iterator:
         one_cycle(epoch, Config, model, optimizer, scheduler, criterion, data_loader,
               tokenizer, device)
