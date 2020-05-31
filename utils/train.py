@@ -8,9 +8,9 @@ import time
 def one_cycle(epoch, config, model, optimizer, scheduler, criterion, data_loader,
               tokenizer, device):
     model.train()
-    for p in model.token_encoder.parameters():
+    for p in model.token_encode_model.parameters():
         assert p.requires_grad == False
-    for p in model.decoder.parameters():
+    for p in model.decoder_model.parameters():
         assert p.requires_grad == True
     with tqdm(total=len(data_loader), desc=f'Epoch: {epoch + 1}') as pbar:
         for i, data in enumerate(data_loader):

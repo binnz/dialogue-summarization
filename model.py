@@ -48,10 +48,10 @@ class DialogueSummarization(nn.Module):
             num_layer=num_layers, heads=num_heads, d_model=dim_model, d_ff=dim_ff, drop_rate=dropout)
         self.generator = Generator(dim_model, vocab_size)
 
-    def token_encoder(self):
+    def token_encode_model(self):
         return self.token_encoder
 
-    def decoder(self):
+    def decoder_model(self):
         return self.decoder
 
     def freeze_bert(self):
