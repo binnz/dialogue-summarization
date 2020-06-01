@@ -40,7 +40,7 @@ class MultiHeadedAttention(nn.Module):
        dropout (float): dropout parameter
     """
 
-    def __init__(self, head_count, model_dim, dropout=0.1, use_final_linear=False):
+    def __init__(self, head_count, model_dim, dropout=0.1, use_final_linear=True):
         assert model_dim % head_count == 0
         self.dim_per_head = model_dim // head_count
         self.model_dim = model_dim

@@ -25,7 +25,7 @@ class Config:
     train_data_path = f'{data_dir}/8-1.train.csv'
     predict_data_path = f'{data_dir}/AutoMaster_TestSet.csv'
     predict_output = 'prediction_result'
-    learning_rate = 1e-3
+    learning_rate = 1e-4
     fn = 'ckpt'
     load = False
     pickle_path = f'{data_dir}/train_data.pkl'
@@ -34,7 +34,7 @@ class Config:
     gradient_accumulation_steps = 1
     weight_decay = 0.0
     adam_epsilon = 1e-8
-    warmup_steps = 0
+    warmup_steps = 3000
     local_rank = -1
     batch_size = 8
     beam_size = 5
