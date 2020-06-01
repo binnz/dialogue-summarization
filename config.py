@@ -37,3 +37,4 @@ class Config:
     warmup_steps = 0
     local_rank = -1
     batch_size = 8
+    beam_size = 5

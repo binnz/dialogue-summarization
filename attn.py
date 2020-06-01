@@ -40,7 +40,7 @@ class MultiHeadedAttention(nn.Module):
        dropout (float): dropout parameter
     """
 
-    def __init__(self, head_count, model_dim, dropout=0.1, use_final_linear=True):
+    def __init__(self, head_count, model_dim, dropout=0.1, use_final_linear=False):
         assert model_dim % head_count == 0
         self.dim_per_head = model_dim // head_count
         self.model_dim = model_dim
@@ -183,7 +183,7 @@ class MultiHeadedAttention(nn.Module):
             output = self.final_linear(context)
             return output
         else:
-            context = torch.matmul(drop_attn, value)
+            context = unshape(torch.matmul(drop_attn, value))
             return context
 
         # CHECK

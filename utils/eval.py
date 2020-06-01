@@ -1,28 +1,17 @@
 import torch
+from .helper import create_single_sample
+from beam_search import beam_search
 
-from .helper import subsequent_mask, create_single_sample
 
-
-def evaluate(config, data, tokenizer, model, device, verbose=True):
+def evaluate(data, tokenizer, model, device):
 
     src = data.source
     src_mask = data.source_mask
     utter_type = data.utter_type
-    mem, utter_mask = model.encode(src, src_mask, utter_type)
-    ys = torch.ones(1, 1).fill_(tokenizer.cls_token_id).long().to(device)
     with torch.no_grad():
-        for i in range(config.max_decode_output_length - 1):
-            out = model.decode(mem, ys, utter_mask, subsequent_mask(ys.size(1)).type_as(ys))
-            prob = model.generate(out[:, -1])
-            _, candidate = prob.topk(5, dim=1)
-            next_word = candidate[0, 0]
-            if next_word == tokenizer.sep_token_id:
-                break
-            ys = torch.cat([ys, torch.ones(1, 1).type_as(ys).fill_(next_word).long()], dim=1)
-    ys = ys.view(-1).detach().cpu().numpy().tolist()[1:]
-    text = tokenizer.decode(ys)
-
-    return text, data.qid[0]
+        output_token = beam_search(device, src, src_mask, utter_type, model, tokenizer)
+    text = tokenizer.decode(output_token)
+    return text
 
 
 def eval_test(config, qa, dialogue, tokenizer, model, device):
@@ -34,18 +23,7 @@ def eval_test(config, qa, dialogue, tokenizer, model, device):
     src_mask = src_mask.unsqueeze(0).transpose(0, 1)
     utter_type = torch.tensor(utter_type, device=device)
     utter_type = utter_type.unsqueeze(0)
-    mem, utter_mask = model.encode(src, src_mask, utter_type)
-    ys = torch.ones(1, 1).fill_(tokenizer.cls_token_id).long().to(device)
     with torch.no_grad():
-        for i in range(config.max_decode_output_length - 1):
-            out = model.decode(mem, ys, utter_mask, subsequent_mask(ys.size(1)).type_as(ys))
-            prob = model.generate(out[:, -1])
-            _, candidate = prob.topk(5, dim=1)
-            next_word = candidate[0, 0]
-            if next_word == tokenizer.sep_token_id:
-                break
-            ys = torch.cat([ys, torch.ones(1, 1).type_as(ys).fill_(next_word).long()], dim=1)
-    ys = ys.view(-1).detach().cpu().numpy().tolist()[1:]
-    text = tokenizer.decode(ys)
-
+        output_token = beam_search(device, src, src_mask, utter_type, model, tokenizer)
+    text = tokenizer.decode(output_token)
     return text

@@ -4,8 +4,9 @@ from torch.nn.utils import clip_grad_norm_
 from tqdm import tqdm
 from .batch import Batch
 from utils.eval import eval_test
-from utils.helper import qa,dialogue,real_report
+from utils.helper import qa, dialogue, real_report
 from tensorboard_logger import Logger
+from utils.helper import save_config
 
 logger = Logger(logdir="./tensorboard_logs", flush_secs=10)
 
@@ -52,6 +53,6 @@ def one_cycle(epoch, config, model, optimizer, scheduler, criterion, data_loader
         'opt': optimizer.state_dict(),
         'scheduler': scheduler.state_dict()
     }, f'{config.data_dir}/{config.fn}_{epoch}.pth')
-    torch.save(config, os.path.join(config.data_dir, "model_config.json"))
+    save_config(config, os.path.join(config.data_dir, "model_config.json"))
     print('*** Saved Model ***')
     print("epoch {} finish".format(epoch))

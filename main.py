@@ -1,14 +1,12 @@
 import logging
 import os
 import pickle
-
 import torch
 import torch.nn as nn
-from  tqdm import trange
 
 from config import Config
 from transformers import BertTokenizer, get_linear_schedule_with_warmup, AdamW
-from utils import (DialogDataset, one_cycle, evaluate, make_train_data_from_txt,
+from utils import (DialogDataset, one_cycle, make_train_data_from_txt,
                    seed_everything, BalancedDataLoader)
 from model import build_model
 

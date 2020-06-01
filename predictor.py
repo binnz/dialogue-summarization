@@ -39,10 +39,10 @@ if __name__ == '__main__':
     total_nums = len(data_loader)
     for i, data in enumerate(data_loader):
         batch = Batch(data, device, mode='eval', pad=tokenizer.pad_token_id)
-        text, qid = evaluate(Config, batch, tokenizer, model, device)
+        text = evaluate(batch, tokenizer, model, device)
         prediction.append(text)
-        qids.append(qid)
-        print("predict finish. QID is {}".format(qid))
+        qids.append(batch.qid[0])
+        print("predict finish. QID is {}".format(batch.qid[0]))
     dataFrame = pd.DataFrame({'QID': qids, 'Prediction': prediction})
 
     dataFrame.to_csv(f'{Config.data_dir}/{Config.predict_output}.csv', index=True, sep=',')
