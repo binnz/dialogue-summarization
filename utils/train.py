@@ -18,8 +18,9 @@ def one_cycle(epoch, config, model, optimizer, scheduler, criterion, data_loader
     with tqdm(total=len(data_loader), desc=f'Epoch: {epoch + 1}') as pbar:
         for i, data in enumerate(data_loader):
             batch = Batch(data, device, pad=tokenizer.pad_token_id)
-            out = model(batch.source, batch.source_mask,
-                            batch.target, batch.target_mask, batch.utter_type)
+            # out,_token_features = model(batch.source, batch.source_mask,
+            #                 batch.target, batch.target_mask, batch.utter_type)
+            out = train_one_batch(batch, model, config)
             loss = criterion(out.transpose(1, 2), batch.target_y).mean()
             loss = loss / config.gradient_accumulation_steps
             loss.backward()
@@ -56,3 +57,21 @@ def one_cycle(epoch, config, model, optimizer, scheduler, criterion, data_loader
     save_config(config, os.path.join(config.data_dir, "model_config.json"))
     print('*** Saved Model ***')
     print("epoch {} finish".format(epoch))
+
+
+def train_one_batch(batch, model,config):
+    source = batch.source
+    source_mask = batch.source_mask
+    target = batch.target
+    target_mask = batch.target_mask
+    utter_type = batch.utter_type
+    target_len = batch.target_len
+    src_features, utterance_mask, token_features, token_mask = model.encode(source, source_mask, utter_type)
+    max_target_len = max(target_len)
+    step_losses = []
+    coverage = torch.zeros_like(utterance_mask).contiguous().float()
+    for di in range(min(max_target_len, config.max_decode_output_length)):
+        local_target = target[:, :di+1]
+        l_target_mask = target_mask[:, di, :di+1]
+        output, attn_dist, coverage = model.decode(local_target, l_target_mask, src_features,
+                         utterance_mask, token_features, token_mask, coverage, di)

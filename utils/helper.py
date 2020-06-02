@@ -7,6 +7,13 @@ import pandas as pd
 import pickle
 import collections
 import six
+from config import Config
+
+def init_wt_normal(wt):
+    wt.data.normal_(std=Config.trunc_norm_init_std)
+
+def init_wt_unif(wt):
+    wt.data.uniform_(-Config.rand_unif_init_mag, Config.rand_unif_init_mag)
 
 def seed_everything(seed):
     random.seed(seed)
@@ -109,6 +116,8 @@ def make_train_data_from_txt(config, tokenizer):
         input_src_mask = []
         for utter in utterances:
             ids_src, mask_src = convert_src_feature(utter, max_seq_length_src, tokenizer)
+            assert any(ids_src)
+            assert any(mask_src)
             input_src_ids.append(ids_src)
             input_src_mask.append(mask_src)
         if not isinstance(report, six.string_types):

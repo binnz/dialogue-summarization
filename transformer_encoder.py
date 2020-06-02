@@ -5,10 +5,10 @@ import math
 
 import torch.nn as nn
 import torch
-
+from config import Config
 from attn import MultiHeadedAttention, MultiHeadedPooling
 from neural import PositionwiseFeedForward, PositionalEncoding, sequence_mask
-
+from utils import init_wt_normal, init_wt_unif
 
 class TransformerEncoderLayer(nn.Module):
     """
@@ -225,6 +225,7 @@ class TransformerEncoder(nn.Module):
              for _ in range(num_layers)])
         self.layer_norm = nn.LayerNorm(d_model, eps=1e-6)
 
+
     def forward(self, src, attention_mask, utter_type, lengths=None):
         """ See :obj:`EncoderBase.forward()`"""
         src = src[:, :self.max_length, :]
@@ -240,9 +241,4 @@ class TransformerEncoder(nn.Module):
 
         mask_hier = attention_mask[:, :, None].float()
         src_features = out * mask_hier
-        src_features = src_features.transpose(0, 1).contiguous()
-        mask_hier = mask_hier.transpose(0, 1).contiguous()
-        # bridge_feature = self._bridge(src_features, mask_hier)
-
-        # return bridge_feature, src_features, mask_hier
         return src_features, mask_hier

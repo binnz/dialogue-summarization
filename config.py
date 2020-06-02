@@ -1,7 +1,7 @@
 class Config:
     pretrained_model_name_or_path = 'bert-base-chinese'
 
-    local = False
+    local = True
     # env = 'prod'
     # model params
     num_train_epochs = 1
@@ -16,13 +16,14 @@ class Config:
     utter_type = 3
     vocab_size = 21128
     max_grad_norm = 1.0
-
+    is_coverage = True
+    pointer_gen = True
     # train
     seed = 123
     device = 'cpu' if local else 'cuda'
     use_pickle = True
     data_dir = './data-dev' if local else './data'
-    train_data_path = f'{data_dir}/8-1.train.csv'
+    train_data_path = f'{data_dir}/test.csv'
     predict_data_path = f'{data_dir}/AutoMaster_TestSet.csv'
     predict_output = 'prediction_result'
     learning_rate = 1e-4
@@ -38,3 +39,5 @@ class Config:
     local_rank = -1
     batch_size = 8
     beam_size = 5
+    rand_unif_init_mag=0.02
+    trunc_norm_init_std=1e-4

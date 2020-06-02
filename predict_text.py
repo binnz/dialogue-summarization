@@ -14,8 +14,8 @@ if __name__ == '__main__':
     device = torch.device(Config.device)
     tokenizer = BertTokenizer.from_pretrained(Config.pretrained_model_name_or_path)
     model = build_model(Config).to(device)
-    state_dict = torch.load(f'{Config.data_dir}/{Config.fn}_{epoch}.pth')
-    model.load_state_dict(state_dict['model'])
+    # state_dict = torch.load(f'{Config.data_dir}/{Config.fn}_{epoch}.pth')
+    # model.load_state_dict(state_dict['model'])
     model.eval()
 
     text = eval_test(Config, qa, dialogue, tokenizer, model, device)

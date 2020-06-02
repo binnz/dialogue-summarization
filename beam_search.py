@@ -10,10 +10,12 @@ from utils import subsequent_mask
 def init_vars(device, src, src_mask, utter_type, model, tokenizer):
 
     start_index = tokenizer.cls_token_id
-    mem, utter_mask = model.encode(src, src_mask, utter_type)
+    mem, utter_mask, token_features, token_mask = model.encode(src, src_mask, utter_type)
     ys = torch.ones(1, 1).fill_(start_index).long().to(device)
     trg_mask = subsequent_mask(ys.size(1)).type_as(ys)
-    out = model.decode(mem, ys, utter_mask, trg_mask)
+    coverage = torch.zeros(utter_mask.size())
+    out = model.decode(ys, trg_mask, mem, utter_mask, token_features, token_mask, coverage)
+
     prob = model.generate(out[:, -1])
     log_scores, ix = prob.topk(Config.beam_size)
     outputs = torch.zeros(Config.beam_size, Config.max_decode_output_length).long()

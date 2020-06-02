@@ -23,12 +23,14 @@ class Batch:
 
         if mode == 'train':
             target_ids = [torch.tensor(x["target_ids"]) for x in data]
+            target_len = [len(x) for x in target_ids]
             target = rnn.pad_sequence(target_ids, batch_first=True, padding_value=pad)
             target = target.to(device)
             self.target = target[:, :-1]
             self.target_y = target[:, 1:]
             self.target_mask = self.make_std_mask(self.target, pad)
             self.n_tokens = (self.target != pad).sum()
+            self.target_len = target_len
 
     @staticmethod
     def make_std_mask(target: torch.Tensor, pad: int) -> torch.Tensor:
