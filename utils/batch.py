@@ -30,7 +30,7 @@ class Batch:
             self.target_y = target[:, 1:]
             self.target_mask = self.make_std_mask(self.target, pad)
             self.n_tokens = (self.target != pad).sum()
-            self.target_len = target_len
+            self.target_len = torch.tensor(target_len).to(device)
 
     @staticmethod
     def make_std_mask(target: torch.Tensor, pad: int) -> torch.Tensor:

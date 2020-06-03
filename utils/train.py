@@ -57,7 +57,7 @@ def train_one_batch(batch, model, config):
     target = batch.target
     target_mask = batch.target_mask
     utter_type = batch.utter_type
-    target_len = torch.tensor(batch.target_len)
+    target_len = batch.target_len
     target_y = batch.target_y
     src_features, utterance_mask, token_features, token_mask = model.encode(source, source_mask, utter_type)
     max_target_len = max(target_len)
@@ -68,6 +68,7 @@ def train_one_batch(batch, model, config):
     for di in range(min(max_target_len, config.max_decode_output_length)-1):
         local_target = target[:, :di+1]
         l_target_mask = target_mask[:, di, :di+1]
+        l_target_mask = l_target_mask.unsqueeze(-1)
         vocab_dist, tgt_attn_dist, p_gen, next_cov, next_tok_cov, tok_utter_index = model.decode(local_target, l_target_mask, src_features, utterance_mask, token_features, token_mask, coverage, token_coverage)
         if config.pointer_gen:
             vocab_dist_ = p_gen * vocab_dist
