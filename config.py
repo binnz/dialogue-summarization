@@ -1,8 +1,7 @@
 class Config:
     pretrained_model_name_or_path = 'bert-base-chinese'
 
-    local = True
-    # env = 'prod'
+    local = False
     # model params
     num_train_epochs = 1
     dim_model = 768
@@ -26,7 +25,7 @@ class Config:
     train_data_path = f'{data_dir}/test.csv'
     predict_data_path = f'{data_dir}/AutoMaster_TestSet.csv'
     predict_output = 'prediction_result'
-    learning_rate = 1e-4
+    learning_rate = 5e-5
     fn = 'ckpt'
     load = False
     pickle_path = f'{data_dir}/train_data.pkl'
@@ -37,7 +36,7 @@ class Config:
     adam_epsilon = 1e-8
     warmup_steps = 3000
     local_rank = -1
-    batch_size = 1
+    batch_size = 8
     beam_size = 5
     cov_loss_wt = 1.0
     eps = 1e-12
