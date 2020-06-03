@@ -103,13 +103,15 @@ def make_train_data_from_txt(config, tokenizer):
 
         valid_dialogue = dialogue.split('|')
         for utter in valid_dialogue:
+            if len(utterances) >= config.max_utter_num_length:
+                print("Utter Too Long QID: {}".format(qid))
+                break
             valid_utter, utter_type = clear_sentence(utter)
             if valid_utter is not None and utter_type is not None:
                 utterances.append(valid_utter)
                 utterances_type.append(utter_type)
             elif valid_utter is not None or utter_type is not None:
                 print("Error data sample {}.{}.{}".format(qid, qa, dialogue))
-
         if len(utterances) == 0:
             continue
         input_src_ids = []
@@ -123,7 +125,7 @@ def make_train_data_from_txt(config, tokenizer):
         if not isinstance(report, six.string_types):
             print("Error Report sample QID is {}.report{}".format(qid, str(report)))
             continue
-        target_ids = convert_tgt_feature(report, max_seq_length_src, tokenizer)
+        target_ids = convert_tgt_feature(report, config.max_decode_output_length, tokenizer)
         features = collections.OrderedDict()
         features["input_src_ids"] = input_src_ids
         features["input_src_mask"] = input_src_mask

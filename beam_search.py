@@ -66,7 +66,7 @@ def beam_search(device, src, src_mask, utter_type, model, tokenizer):
     ind = None
     index_1 = torch.arange(0, Config.batch_size).long()
     for i in range(2, Config.max_decode_output_length):
-        trg_mask = torch.tensor([[True for _ in range(i)]])
+        trg_mask = torch.tensor([[True for _ in range(i)]]).to(device)
         vocab_dist, tgt_attn_dist, p_gen, coverage, token_coverage, tok_utter_index = model.decode(outputs[:, :i], trg_mask, e_outputs, utter_mask, token_features, token_mask, coverage, token_coverage)
         # ys, trg_mask, mem, utter_mask, token_features, token_mask, coverage, token_coverage
         if Config.pointer_gen:

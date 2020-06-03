@@ -29,7 +29,9 @@ def one_cycle(epoch, config, model, optimizer, scheduler, data_loader,
                 scheduler.step()
                 optimizer.zero_grad()
             pbar.update(1)
+            torch.cuda.empty_cache()
             pbar.set_postfix_str(f'Loss: {loss.item():.5f}')
+            torch.cuda.empty_cache()
             if i % 100 == 0 and i!=0:
                 torch.save({
                     'epoch': epoch,
