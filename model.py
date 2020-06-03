@@ -1,12 +1,12 @@
 import torch
 from torch import nn
-import torch.nn.functional as F
 from transformers import BertModel
 from transformer_encoder import TransformerEncoder
 from decoder import build_decoder
 from neural import PositionalEncoding
 from generator import Generator
 from config import Config
+
 
 def build_model(config):
     model = DialogueSummarization(
@@ -46,7 +46,6 @@ class DialogueSummarization(nn.Module):
             num_layers, dim_model, num_heads, dim_ff, dropout, max_utter_num_length, utter_type, embeddings)
         self.decoder = build_decoder(
             num_layer=num_layers, heads=num_heads, d_model=dim_model, d_ff=dim_ff, drop_rate=dropout)
-        self.generator = Generator(dim_model, vocab_size)
 
         self.token_weight_1 = nn.Linear(Config.dim_model, 1, bias=False)
         self.token_weight_2 = nn.Linear(Config.dim_model, Config.dim_model, bias=True)
@@ -54,9 +53,6 @@ class DialogueSummarization(nn.Module):
             if param.dim() > 1:
                 nn.init.xavier_uniform_(param)
         for param in self.decoder.parameters():
-            if param.dim() > 1:
-                nn.init.xavier_uniform_(param)
-        for param in self.generator.parameters():
             if param.dim() > 1:
                 nn.init.xavier_uniform_(param)
 
@@ -94,7 +90,7 @@ class DialogueSummarization(nn.Module):
             mask = source_mask[utter_index].unsqueeze(-1)
             out = out * mask
             token_features.append(out)
-            out_1 = F.tanh(self.token_weight_2(out))
+            out_1 = torch.tanh(self.token_weight_2(out))
             out_2 = self.token_weight_1(out_1)
             utterance_features.append(torch.mean(out * out_2, dim=1))
         utterance_features = torch.stack(utterance_features, dim=1)

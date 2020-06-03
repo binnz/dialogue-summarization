@@ -2,7 +2,6 @@ import logging
 import os
 import pickle
 import torch
-import torch.nn as nn
 
 from config import Config
 from transformers import BertTokenizer, get_linear_schedule_with_warmup, AdamW
@@ -38,7 +37,7 @@ if __name__ == '__main__':
         train_data = make_train_data_from_txt(Config, tokenizer)
         with open(f'{Config.pickle_path}', 'wb') as f:
             pickle.dump(train_data, f)
-    # itf = make_itf(train_data, Config.vocab_size)
+
     dataset = DialogDataset(train_data, tokenizer)
     data_loader = BalancedDataLoader(dataset, tokenizer.pad_token_id)
     t_total = len(data_loader) // Config.gradient_accumulation_steps * Config.num_train_epochs
@@ -50,7 +49,6 @@ if __name__ == '__main__':
     model.zero_grad()
 
     logging.info('Define Loss and Optimizer')
-    criterion = nn.CrossEntropyLoss(reduction='none')
     no_decay = ["bias", "LayerNorm.weight"]
     optimizer_grouped_parameters = [
         {
@@ -63,7 +61,6 @@ if __name__ == '__main__':
     scheduler = get_linear_schedule_with_warmup(
         optimizer, num_warmup_steps=Config.warmup_steps, num_training_steps=t_total
     )
-    # optimizer = optim.AdamW(filter(lambda p: p.requires_grad, model.parameters()), lr=Config.lr, betas=Config.betas, eps=1e-9)
 
     if Config.load:
         state_dict = torch.load(f'{Config.data_dir}/{Config.fn}.pth')
@@ -73,8 +70,6 @@ if __name__ == '__main__':
         optimizer.load_state_dict(state_dict['opt'])
 
     logging.info('Start Training')
-    print("T total", t_total)
+    print("Total steps: ", t_total)
     for epoch in range(start_epoch, Config.num_train_epochs):
-        one_cycle(epoch, Config, model, optimizer, scheduler, criterion, data_loader,
-              tokenizer, device)
-        # evaluate(Config, 'おはよーーー', tokenizer, model, device)
+        one_cycle(epoch, Config, model, optimizer, scheduler, data_loader, tokenizer, device)

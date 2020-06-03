@@ -37,7 +37,7 @@ class Config:
     adam_epsilon = 1e-8
     warmup_steps = 3000
     local_rank = -1
-    batch_size = 8
+    batch_size = 1
     beam_size = 5
-    rand_unif_init_mag=0.02
-    trunc_norm_init_std=1e-4
+    cov_loss_wt = 1.0
+    eps = 1e-12

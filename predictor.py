@@ -30,7 +30,7 @@ if __name__ == '__main__':
     data_loader = BalancedDataLoader(dataSet, tokenizer.pad_token_id, 'predict')
 
     model = build_model(Config).to(device)
-    state_dict = torch.load(f'{Config.data_dir}/{Config.fn}_{epoch}.pth')
+    state_dict = torch.load(f'{Config.data_dir}/{Config.fn}.pth')
     model.load_state_dict(state_dict['model'])
     model.eval()
     print('*** Start Evaluate ***')

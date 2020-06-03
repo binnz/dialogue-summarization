@@ -10,6 +10,8 @@ def evaluate(data, tokenizer, model, device):
     utter_type = data.utter_type
     with torch.no_grad():
         output_token = beam_search(device, src, src_mask, utter_type, model, tokenizer)
+    while output_token[-1] == 0:
+        output_token = output_token[:-1]
     text = tokenizer.decode(output_token)
     return text
 

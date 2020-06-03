@@ -13,20 +13,29 @@ def init_vars(device, src, src_mask, utter_type, model, tokenizer):
     mem, utter_mask, token_features, token_mask = model.encode(src, src_mask, utter_type)
     ys = torch.ones(1, 1).fill_(start_index).long().to(device)
     trg_mask = subsequent_mask(ys.size(1)).type_as(ys)
-    coverage = torch.zeros(utter_mask.size())
-    out = model.decode(ys, trg_mask, mem, utter_mask, token_features, token_mask, coverage)
 
-    prob = model.generate(out[:, -1])
-    log_scores, ix = prob.topk(Config.beam_size)
+    coverage = torch.zeros_like(utter_mask).contiguous().float()
+    token_coverage = torch.zeros_like(token_mask).contiguous().float()
+    vocab_dist, tgt_attn_dist, p_gen, next_cov, next_tok_cov, tok_utter_index = model.decode(ys, trg_mask, mem, utter_mask, token_features, token_mask, coverage, token_coverage)
+    index_1 = torch.arange(0, Config.batch_size).long()
+    if Config.pointer_gen:
+        vocab_dist_ = p_gen * vocab_dist
+        attn_dist_ = (1 - p_gen) * tgt_attn_dist
+        token_attn_indices = src[tok_utter_index, index_1, :]
+        final_dist = vocab_dist_.scatter_add(1, token_attn_indices, attn_dist_)
+    else:
+        final_dist = vocab_dist
+    final_dist = torch.log(final_dist)
+    log_scores, ix = final_dist.topk(Config.beam_size)
     outputs = torch.zeros(Config.beam_size, Config.max_decode_output_length).long()
 
     outputs = outputs.to(device)
     outputs[:, 0] = start_index
     outputs[:, 1] = ix[0]
-    e_outputs = torch.zeros(Config.beam_size, mem.size(-2),mem.size(-1))
+    e_outputs = torch.zeros(Config.beam_size, mem.size(-2), mem.size(-1))
     e_outputs = e_outputs.to(device)
     e_outputs[:, :] = mem[0]
-    return outputs, e_outputs, log_scores, utter_mask
+    return outputs, e_outputs, log_scores, utter_mask, next_cov, next_tok_cov, mem, utter_mask, token_features, token_mask
 
 
 def k_best_outputs(outputs, prob, log_scores, i, k):
@@ -46,15 +55,29 @@ def k_best_outputs(outputs, prob, log_scores, i, k):
 
 
 def beam_search(device, src, src_mask, utter_type, model, tokenizer):
-    outputs, e_outputs, log_scores, utter_mask = init_vars(device, src, src_mask, utter_type, model, tokenizer)
-
+    outputs, e_outputs, log_scores, utter_mask, coverage, token_coverage, mem, utter_mask, token_features, token_mask = init_vars(device, src, src_mask, utter_type, model, tokenizer)
+    utter_len = utter_mask.shape[1]
+    token_len = token_mask.shape[2]
+    coverage = coverage.expand(Config.beam_size, utter_len).contiguous()
+    token_coverage = token_coverage.expand(utter_len, Config.beam_size, token_len).contiguous()
+    u, b, t_l, dim = token_features.shape
+    token_features = token_features.expand(u, Config.beam_size, t_l, dim).contiguous()
     end_index = tokenizer.sep_token_id
     ind = None
+    index_1 = torch.arange(0, Config.batch_size).long()
     for i in range(2, Config.max_decode_output_length):
-        trg_mask = subsequent_mask(i).to(device)
-        out = model.decode(e_outputs, outputs[:, :i], utter_mask, trg_mask)
-        prob = model.generate(out[:, -1])
-        outputs, log_scores = k_best_outputs(outputs, prob, log_scores, i, Config.beam_size)
+        trg_mask = torch.tensor([[True for _ in range(i)]])
+        vocab_dist, tgt_attn_dist, p_gen, coverage, token_coverage, tok_utter_index = model.decode(outputs[:, :i], trg_mask, e_outputs, utter_mask, token_features, token_mask, coverage, token_coverage)
+        # ys, trg_mask, mem, utter_mask, token_features, token_mask, coverage, token_coverage
+        if Config.pointer_gen:
+            vocab_dist_ = p_gen * vocab_dist
+            attn_dist_ = (1 - p_gen) * tgt_attn_dist
+            token_attn_indices = src[tok_utter_index, index_1, :]
+            final_dist = vocab_dist_.scatter_add(1, token_attn_indices, attn_dist_)
+        else:
+            final_dist = vocab_dist
+        final_dist = torch.log(final_dist)
+        outputs, log_scores = k_best_outputs(outputs, final_dist, log_scores, i, Config.beam_size)
 
         ones = (outputs == end_index).nonzero()  # Occurrences of end symbols for all input summaries.
         summary_lengths = torch.zeros(len(outputs), dtype=torch.long).to(device)
