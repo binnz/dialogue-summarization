@@ -54,6 +54,9 @@ def make_predict_data_from_txt(config, tokenizer):
             print("Float Dialogue QID{}, text{}".format(qid, dialogue))
         dialogue = dialogue.split('|')
         for utter in dialogue:
+            if len(utterances) >= config.max_utter_num_length:
+                print("Utter Too Long QID: {}".format(qid))
+                break
             valid_utter, utter_type = clear_sentence(utter)
             if valid_utter is not None and utter_type is not None:
                 utterances.append(valid_utter)
