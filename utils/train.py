@@ -5,10 +5,7 @@ from tqdm import tqdm
 from .batch import Batch
 from utils.eval import eval_test
 from utils.helper import qa, dialogue, real_report
-from tensorboard_logger import Logger
 from utils.helper import save_config
-
-logger = Logger(logdir="./tensorboard_logs", flush_secs=10)
 
 
 def one_cycle(epoch, config, model, optimizer, scheduler, data_loader,
@@ -22,7 +19,6 @@ def one_cycle(epoch, config, model, optimizer, scheduler, data_loader,
             loss = loss / config.gradient_accumulation_steps
             loss.backward()
             print("Loss", loss.item())
-            logger.log_value('loss', loss.item(), epoch*len(data_loader) + i)
             if (i + 1) % config.gradient_accumulation_steps == 0:
                 clip_grad_norm_(model.parameters(), config.max_grad_norm)
                 optimizer.step()
@@ -31,12 +27,12 @@ def one_cycle(epoch, config, model, optimizer, scheduler, data_loader,
             pbar.update(1)
             torch.cuda.empty_cache()
             pbar.set_postfix_str(f'Loss: {loss.item():.5f}')
-            torch.cuda.empty_cache()
-            if i % 100 == 0 and i!=0:
+            if i % 100 == 0 and i != 0:
                 torch.save({
                     'epoch': epoch,
                     'model': model.state_dict(),
-                    'opt': optimizer.state_dict()
+                    'opt': optimizer.state_dict(),
+                    'scheduler': scheduler.state_dict()
                 }, f'{config.data_dir}/{config.fn}.pth')
 
                 text = eval_test(config, qa, dialogue, tokenizer, model, device)
@@ -47,6 +43,7 @@ def one_cycle(epoch, config, model, optimizer, scheduler, data_loader,
         'model': model.state_dict(),
         'opt': optimizer.state_dict(),
         'scheduler': scheduler.state_dict()
+
     }, f'{config.data_dir}/{config.fn}_{epoch}.pth')
     save_config(config, os.path.join(config.data_dir, "model_config.json"))
     print('*** Saved Model ***')

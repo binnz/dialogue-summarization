@@ -47,7 +47,6 @@ if __name__ == '__main__':
     model.unfreeze()
     model.freeze_bert()
     model.zero_grad()
-
     logging.info('Define Loss and Optimizer')
     no_decay = ["bias", "LayerNorm.weight"]
     optimizer_grouped_parameters = [
@@ -68,6 +67,7 @@ if __name__ == '__main__':
         print(f'Start Epoch: {start_epoch}')
         model.load_state_dict(state_dict['model'])
         optimizer.load_state_dict(state_dict['opt'])
+        scheduler.load_state_dict(state_dict['scheduler'])
 
     logging.info('Start Training')
     print("Total steps: ", t_total)
