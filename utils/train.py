@@ -6,6 +6,12 @@ from .batch import Batch
 from utils.eval import eval_test
 from utils.helper import qa, dialogue, real_report
 from utils.helper import save_config
+import logging
+from config import Config
+logging.basicConfig(filename=Config.logger_path,
+                            filemode='a',
+                            format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                            datefmt='%H:%M:%S')
 
 
 def one_cycle(epoch, config, model, optimizer, scheduler, data_loader,
@@ -16,6 +22,7 @@ def one_cycle(epoch, config, model, optimizer, scheduler, data_loader,
         for i, data in enumerate(data_loader):
             batch = Batch(data, device, pad=tokenizer.pad_token_id)
             loss = train_one_batch(batch, model, config)
+            logging.info("C step:", i, loss)
             loss = loss / config.gradient_accumulation_steps
             loss.backward()
             print("Loss", loss.item())
@@ -59,7 +66,9 @@ def train_one_batch(batch, model, config):
     target_len = batch.target_len
     target_y = batch.target_y
     src_features, utterance_mask, token_features, token_mask = model.encode(source, source_mask, utter_type)
+    logging.info("A encoder:", src_features)
     max_target_len = max(target_len)
+    assert len(max_target_len[max_target_len == 0]) == 0
     step_losses = []
     coverage = torch.zeros_like(utterance_mask).contiguous().float()
     token_coverage = torch.zeros_like(token_mask).contiguous().float()
@@ -90,10 +99,12 @@ def train_one_batch(batch, model, config):
             token_coverage = next_tok_cov
         step_mask = target_mask[:, di, di]
         step_loss = step_loss * step_mask
+        logging.info("B decoder", step_loss)
         step_losses.append(step_loss)
 
     sum_loss_11 = torch.stack(step_losses, 1)
     sum_losses = torch.sum(sum_loss_11, 1)
+    logging.info("C sum loss", sum_losses)
     batch_avg_loss = sum_losses/target_len
     loss = torch.mean(batch_avg_loss)
     return loss

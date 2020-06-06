@@ -1,9 +1,7 @@
 import math
 from abc import ABC
-
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 
 class AttentionLayer(nn.Module, ABC):
@@ -77,7 +75,7 @@ class MultiHeadAttention(nn.Module):
         if mask is not None:
             scores = scores.masked_fill(mask == 0, -1e9)
         # softmax((QK^T)/sqrt(d_k))
-        attn = F.softmax(scores, dim=-1)
+        attn = torch.softmax(scores, dim=-1)
         if dropout is not None:
             attn = dropout(attn)
         # calculate softmax((QK^T)/sqrt(d_k))V and return result and attention score

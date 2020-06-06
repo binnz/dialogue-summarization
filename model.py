@@ -4,7 +4,6 @@ from transformers import BertModel
 from transformer_encoder import TransformerEncoder
 from decoder import build_decoder
 from neural import PositionalEncoding
-from generator import Generator
 from config import Config
 
 
@@ -47,8 +46,8 @@ class DialogueSummarization(nn.Module):
         self.decoder = build_decoder(
             num_layer=num_layers, heads=num_heads, d_model=dim_model, d_ff=dim_ff, drop_rate=dropout)
 
-        self.token_weight_1 = nn.Linear(Config.dim_model, 1, bias=False)
-        self.token_weight_2 = nn.Linear(Config.dim_model, Config.dim_model, bias=True)
+        # self.token_weight_1 = nn.Linear(Config.dim_model, 1, bias=False)
+        # self.token_weight_2 = nn.Linear(Config.dim_model, Config.dim_model, bias=True)
         for param in self.utterance_encoder.parameters():
             if param.dim() > 1:
                 nn.init.xavier_uniform_(param)
@@ -90,9 +89,9 @@ class DialogueSummarization(nn.Module):
             mask = source_mask[utter_index].unsqueeze(-1)
             out = out * mask
             token_features.append(out)
-            out_1 = torch.tanh(self.token_weight_2(out))
-            out_2 = self.token_weight_1(out_1)
-            utterance_features.append(torch.mean(out * out_2, dim=1))
+            # out_1 = torch.tanh(self.token_weight_2(out))
+            # out_2 = self.token_weight_1(out_1)
+            utterance_features.append(torch.mean(out, dim=1))
         utterance_features = torch.stack(utterance_features, dim=1)
         src_features, _ = self.utterance_encoder(
             utterance_features, utterance_input_mask, utter_type)

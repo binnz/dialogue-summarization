@@ -62,11 +62,11 @@ if __name__ == '__main__':
     )
 
     if Config.load:
-        state_dict = torch.load(f'{Config.data_dir}/{Config.fn}.pth')
-        start_epoch = 10
+        state_dict = torch.load(f'{Config.data_dir}/{Config.fn}.pth', map_location=device)
+        start_epoch = 0
         print(f'Start Epoch: {start_epoch}')
-        model.load_state_dict(state_dict['model'])
-        optimizer.load_state_dict(state_dict['opt'])
+        model.load_state_dict(state_dict['model'], strict=False)
+        # optimizer.load_state_dict(state_dict['opt'],strict=False)
         scheduler.load_state_dict(state_dict['scheduler'])
 
     logging.info('Start Training')
