@@ -42,6 +42,7 @@ if __name__ == '__main__':
         text = evaluate(batch, tokenizer, model, device)
         prediction.append(text)
         qids.append(batch.qid[0])
+        print(text)
         print("predict finish. QID is {}".format(batch.qid[0]))
     dataFrame = pd.DataFrame({'QID': qids, 'Prediction': prediction})
 
