@@ -6,9 +6,8 @@ import sys
 def init_logger(logger_name, logging_path):
     if logger_name not in Logger.manager.loggerDict:
         logger = logging.getLogger(logger_name)
-        logger.setLevel(logging.DEBUG)
-        consolehandler = logging.StreamHandler(sys.stdout)
-        consolehandler.setLevel(logging.FATAL)
+        logger.setLevel(logging.INFO)
+        logger.propagate = False
 
         handler = TimedRotatingFileHandler(filename=logging_path, when='D', backupCount = 7)
         datefmt = '%Y-%m-%d %H:%M:%S'
@@ -17,6 +16,5 @@ def init_logger(logger_name, logging_path):
         handler.setFormatter(formatter)
         handler.setLevel(logging.INFO)
         logger.addHandler(handler)
-        logger.addHandler(consolehandler)
     logger = logging.getLogger(logger_name)
     return logger

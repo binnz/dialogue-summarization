@@ -38,12 +38,12 @@ class Decoder(nn.Module):
             target_features = layer(target_features, encode_features, utterance_mask, target_mask)
         target_features = self.norm(target_features)
         local_dec_feature = target_features[:, -1, :]
-        logger.info('decoder layer out{}__{}'.format(torch.min(target_features),torch.max(target_features)))
+        logger.info('decoder layer out {}__{}'.format(torch.min(target_features),torch.max(target_features)))
         #  utterance local attention
         utterance_mask = utterance_mask.squeeze(1)
         utterance_output, utterance_attn_dist, utterance_coverage = self.utterance_attention(local_dec_feature, encode_features, utterance_mask, coverage)
-        logger.info("utter loc-Att out{}__{}".format(torch.min(utterance_output), torch.max(utterance_output)))
-        logger.info("utter loc-Att cov{}__{}".format(torch.min(utterance_coverage), torch.max(utterance_coverage)))
+        logger.info("utter loc-Att out {}__{}".format(torch.min(utterance_output), torch.max(utterance_output)))
+        logger.info("utter loc-Att cov {}__{}".format(torch.min(utterance_coverage), torch.max(utterance_coverage)))
         utter_length = len(token_features)
         assert utter_length == len(token_mask)
         assert utter_length == encode_features.shape[1]
@@ -54,8 +54,8 @@ class Decoder(nn.Module):
         next_tok_cov = []
         for u_index in range(utter_length):
             output, attn_dist, coverage = self.token_attention(local_dec_feature, token_features[u_index], token_mask[u_index], token_coverage[u_index])
-            logger.info("token loc-att out{}__{}".format(torch.min(output), torch.max(output)))
-            logger.info("token loc-att cov{}__{}".format(torch.min(coverage), torch.max(coverage)))
+            logger.info("token loc-att out {}__{}".format(torch.min(output), torch.max(output)))
+            logger.info("token loc-att cov {}__{}".format(torch.min(coverage), torch.max(coverage)))
             utters_attn_dist.append(attn_dist)
             utters_outout.append(output)
             next_tok_cov.append(coverage)
@@ -75,7 +75,7 @@ class Decoder(nn.Module):
 
         output = self.out1(output)
         output = self.out2(output)
-        logger.info("decode last out{}__{}".format(torch.min(output), torch.max(output)))
+        logger.info("decode last out {}__{}".format(torch.min(output), torch.max(output)))
         vocab_dist = torch.softmax(output, dim=1)
         return vocab_dist, target_attn_dist, p_gen, utterance_coverage, next_tok_cov, utter_index
 

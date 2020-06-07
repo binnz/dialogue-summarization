@@ -98,7 +98,7 @@ class DialogueSummarization(nn.Module):
         utterance_features = torch.stack(utterance_features, dim=1)
         src_features, _ = self.utterance_encoder(
             utterance_features, utterance_input_mask, utter_type)
-        logger.info("utter encoder{}__{}".format(torch.min(src_features), torch.max(src_features)))
+        logger.info("utter encoder {}__{}".format(torch.min(src_features), torch.max(src_features)))
         token_features = torch.stack(token_features, dim=0)
         return src_features, utterance_input_mask, token_features, source_mask
 

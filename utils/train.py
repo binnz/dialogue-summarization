@@ -21,7 +21,7 @@ def one_cycle(epoch, config, model, optimizer, scheduler, data_loader,
         for i, data in enumerate(data_loader):
             batch = Batch(data, device, pad=tokenizer.pad_token_id)
             loss = train_one_batch(batch, model, config)
-            logger.info("C step:{}.step{}".format(i, loss))
+            logger.info("C step:{}.step {}".format(i, loss))
             loss = loss / config.gradient_accumulation_steps
             loss.backward()
             print("Loss", loss.item())
@@ -78,11 +78,11 @@ def train_one_batch(batch, model, config):
         l_target_mask = target_mask[:, di, :di+1]
         l_target_mask = l_target_mask.unsqueeze(-1)
         vocab_dist, tgt_attn_dist, p_gen, next_cov, next_tok_cov, tok_utter_index = model.decode(local_target, l_target_mask, src_features, utterance_mask, token_features, token_mask, coverage, token_coverage)
-        logger.info("train voc_dist{}__{}".format(torch.min(vocab_dist),torch.max(vocab_dist)))
-        logger.info("train tgt_dist{}__{}".format(torch.min(tgt_attn_dist),torch.max(tgt_attn_dist)))
-        logger.info("train p_gen{}__{}".format(torch.min(p_gen),torch.max(p_gen)))
-        logger.info("train next_cov{}__{}".format(torch.min(next_cov),torch.max(next_cov)))
-        logger.info("train ne_tok_cov{}__{}".format(torch.min(next_tok_cov),torch.max(next_tok_cov)))
+        logger.info("train voc_dist {}__{}".format(torch.min(vocab_dist),torch.max(vocab_dist)))
+        logger.info("train tgt_dist {}__{}".format(torch.min(tgt_attn_dist),torch.max(tgt_attn_dist)))
+        logger.info("train p_gen {}__{}".format(torch.min(p_gen),torch.max(p_gen)))
+        logger.info("train next_cov {}__{}".format(torch.min(next_cov),torch.max(next_cov)))
+        logger.info("train ne_tok_cov {}__{}".format(torch.min(next_tok_cov),torch.max(next_tok_cov)))
 
         if config.pointer_gen:
             vocab_dist_ = p_gen * vocab_dist
@@ -91,13 +91,13 @@ def train_one_batch(batch, model, config):
             final_dist = vocab_dist_.scatter_add(1, token_attn_indices, attn_dist_)
         else:
             final_dist = vocab_dist
-        logger.info("final dist{}__{}".format(torch.min(final_dist),torch.max(final_dist)))
+        logger.info("final dist {}__{}".format(torch.min(final_dist),torch.max(final_dist)))
         real_target = target_y[:, di]
         target_1 = real_target.unsqueeze(1)
         glob_prob = torch.gather(final_dist, 1, target_1)
         glob_prob_ = glob_prob.squeeze()
         step_loss = -torch.log(glob_prob_ + config.eps)
-        logger.info("step loss{}__{}".format(torch.min(step_loss),torch.max(step_loss)))
+        logger.info("step loss {}__{}".format(torch.min(step_loss),torch.max(step_loss)))
         if config.is_coverage:
             tgt_cov = token_coverage[tok_utter_index, index_1, :]
             res = torch.min(tgt_attn_dist, tgt_cov)
@@ -105,16 +105,16 @@ def train_one_batch(batch, model, config):
             step_loss = step_loss + config.cov_loss_wt * step_coverage_loss
             coverage = next_cov
             token_coverage = next_tok_cov
-        logger.info("step loss after cov{}__{}".format(torch.min(step_loss),torch.max(step_loss)))
+        logger.info("step loss after cov {}__{}".format(torch.min(step_loss),torch.max(step_loss)))
         step_mask = target_mask[:, di, di]
         step_loss = step_loss * step_mask
-        logging.info("lass loss{}__{}".format(torch.min(step_loss),torch.max(step_loss)))
+        logging.info("lass loss {}__{}".format(torch.min(step_loss),torch.max(step_loss)))
         step_losses.append(step_loss)
 
     sum_loss_11 = torch.stack(step_losses, 1)
     sum_losses = torch.sum(sum_loss_11, 1)
     logging.info("C sum loss", sum_losses)
     batch_avg_loss = sum_losses/target_len
-    logging.info("avg loss{}__{}".format(torch.min(batch_avg_loss),torch.max(batch_avg_loss)))
+    logging.info("avg loss {}__{}".format(torch.min(batch_avg_loss),torch.max(batch_avg_loss)))
     loss = torch.mean(batch_avg_loss)
     return loss
