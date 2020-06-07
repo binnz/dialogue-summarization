@@ -170,7 +170,6 @@ class MultiHeadedAttention(nn.Module):
         # 2) Calculate and scale scores.
         query = query / math.sqrt(dim_per_head)
         scores = torch.matmul(query, key.transpose(2, 3))
-        logger.info("att scores{}__{}".format(torch.min(scores), torch.max(scores)))
         if mask is not None:
             mask = mask.unsqueeze(1).expand_as(scores)
             scores = scores.masked_fill(mask == 1, -1e18)
@@ -179,7 +178,6 @@ class MultiHeadedAttention(nn.Module):
 
         attn = self.softmax(scores)
 
-        logger.info("att attn{}__{}".format(torch.min(attn), torch.max(attn)))
         drop_attn = self.dropout(attn)
         if(self.use_final_linear):
             context = unshape(torch.matmul(drop_attn, value))

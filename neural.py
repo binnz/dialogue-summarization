@@ -103,9 +103,7 @@ class PositionwiseFeedForward(nn.Module):
         """
         t = self.layer_norm(x)
         t1 = self.w_1(t)
-        logger.info("relu before{}__{}".format(torch.min(t1), torch.max(t1)))
         t2 = self.relu(t1)
-        logger.info("relu after{}__{}".format(torch.min(t2), torch.max(t2)))
         inter = self.dropout_1(t2)
         output = self.dropout_2(self.w_2(inter))
         return output + x

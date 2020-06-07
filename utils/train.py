@@ -34,7 +34,7 @@ def one_cycle(epoch, config, model, optimizer, scheduler, data_loader,
             pbar.set_postfix_str(f'Loss: {loss.item():.5f}')
             if i % 100 == 0 and i != 0:
                 s = len(data_loader)//16
-                st = i/s
+                st = i//s
                 torch.save({
                     'epoch': epoch,
                     'model': model.state_dict(),

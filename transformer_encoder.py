@@ -44,11 +44,9 @@ class TransformerEncoderLayer(nn.Module):
             * outputs `[batch_size x src_len x model_dim]`
         """
         input_norm = self.layer_norm(inputs)
-        logger.info("inout norm {}__{} ".format(torch.min(input_norm),torch.max(input_norm)))
         mask = mask.unsqueeze(1)
         context = self.self_attn(input_norm, input_norm, input_norm,
                                  mask=mask)
-        logger.info("output{}__{}".format(torch.min(context), torch.max(context)))
         out = self.dropout(context) + inputs
         return self.feed_forward(out)
 
@@ -79,6 +77,8 @@ class TransformerEncoder(nn.Module):
         self.embeddings = embeddings
         self.utterance_emb = nn.Embedding(utter_type, d_model)
         self.pos_emb = PositionalEncoding(dropout, d_model, max_utter_num_length)
+        self.emb_layerNorm = nn.LayerNorm(d_model, eps=1e-6)
+        self.emb_dropout = nn.Dropout(dropout)
         self.transformer_local = nn.ModuleList(
             [TransformerEncoderLayer(d_model, heads, d_ff, dropout)
              for _ in range(num_layers)])
@@ -90,16 +90,18 @@ class TransformerEncoder(nn.Module):
         src = src[:, :self.max_length, :]
         attention_mask = attention_mask[:, :self.max_length]
         utter_type = utter_type[:, :self.max_length]
-
+        logger.info("before emb {}__{}".format(torch.min(src), torch.max(src)))
         out = self.pos_emb(src)
         utter_emb = self.utterance_emb(utter_type)
+        logger.info("after emb {}__{}".format(torch.min(out), torch.max(out)))
+        logger.info("utter emb {}__{}".format(torch.min(utter_emb), torch.max(utter_emb)))
         out = out + utter_emb
-        logger.info("before layer{}__{}".format(torch.min(out),torch.max(out)))
+        out = self.emb_layerNorm(out)
+        out = self.emb_dropout(out)
+        logger.info("before layer {}__{}".format(torch.min(out), torch.max(out)))
         for i in range(self.num_layers):
             out = self.transformer_local[i](out, out, 1 - attention_mask)  # all_sents * max_tokens * dim
-        logger.info("after layer{}__{}".format(torch.min(out),torch.max(out)))
         out = self.layer_norm(out)
-        logger.info("after norm{}__{}".format(torch.min(out),torch.max(out)))
         mask_hier = attention_mask[:, :, None].float()
         src_features = out * mask_hier
         return src_features, mask_hier
