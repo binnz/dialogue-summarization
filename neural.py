@@ -2,6 +2,9 @@ import math
 import torch
 
 from torch import nn
+from config import Config
+from utils import init_logger
+logger = init_logger(__name__, Config.logger_path)
 
 def tile(x, count, dim=0):
     """
@@ -98,6 +101,11 @@ class PositionwiseFeedForward(nn.Module):
         Returns:
             output: [ batch_size, input_len, model_dim ]
         """
-        inter = self.dropout_1(self.relu(self.w_1(self.layer_norm(x))))
+        t = self.layer_norm(x)
+        t1 = self.w_1(t)
+        logger.info("relu before{}__{}".format(torch.min(t1), torch.max(t1)))
+        t2 = self.relu(t1)
+        logger.info("relu after{}__{}".format(torch.min(t2), torch.max(t2)))
+        inter = self.dropout_1(t2)
         output = self.dropout_2(self.w_2(inter))
         return output + x
