@@ -5,7 +5,10 @@ from transformer_encoder import TransformerEncoder
 from decoder import build_decoder
 from neural import PositionalEncoding
 from config import Config
+from utils.logger import init_logger
+import logging
 
+logger = init_logger(__name__, Config.logger_path)
 
 def build_model(config):
     model = DialogueSummarization(
@@ -95,6 +98,7 @@ class DialogueSummarization(nn.Module):
         utterance_features = torch.stack(utterance_features, dim=1)
         src_features, _ = self.utterance_encoder(
             utterance_features, utterance_input_mask, utter_type)
+        logger.info("utter encoder{}__{}".format(torch.min(src_features), torch.max(src_features)))
         token_features = torch.stack(token_features, dim=0)
         return src_features, utterance_input_mask, token_features, source_mask
 

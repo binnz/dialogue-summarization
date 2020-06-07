@@ -9,14 +9,6 @@ from utils import (DialogDataset, one_cycle, make_train_data_from_txt,
                    seed_everything, BalancedDataLoader)
 from model import build_model
 
-logger = logging.getLogger(__name__)
-# Setup logging
-logging.basicConfig(
-        format="%(asctime)s - %(levelname)s - %(name)s -   %(message)s",
-        datefmt="%m/%d/%Y %H:%M:%S",
-        level=logging.INFO if Config.local_rank in [-1, 0] else logging.WARN,
-    )
-
 if __name__ == '__main__':
     logging.info('*** Initializing ***')
 
