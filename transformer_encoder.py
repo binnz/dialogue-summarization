@@ -66,7 +66,9 @@ class TransformerPoolingLayer(nn.Module):
         out = self.dropout(context)
 
         return self.feed_forward(out)
-
+def hook_fn(m, i, o):
+        logger = init_logger('grad', './data-dev/grad.log')
+        logger.info("module_ff {}{}{}".format(m,i,o))
 class TransformerEncoder(nn.Module):
     def __init__(self, num_layers, d_model, heads, d_ff,
                  dropout, max_utter_num_length, utter_type, embeddings):
@@ -90,15 +92,13 @@ class TransformerEncoder(nn.Module):
         src = src[:, :self.max_length, :]
         attention_mask = attention_mask[:, :self.max_length]
         utter_type = utter_type[:, :self.max_length]
-        logger.info("before emb {}__{}".format(torch.min(src), torch.max(src)))
+        logger.info("before emb {}__{}".format(torch.min(self.utterance_emb.weight), torch.max(self.utterance_emb.weight)))
         out = self.pos_emb(src)
         utter_emb = self.utterance_emb(utter_type)
-        logger.info("after emb {}__{}".format(torch.min(out), torch.max(out)))
-        logger.info("utter emb {}__{}".format(torch.min(utter_emb), torch.max(utter_emb)))
+        self.utterance_emb.register_backward_hook(hook_fn)
         out = out + utter_emb
         out = self.emb_layerNorm(out)
         out = self.emb_dropout(out)
-        logger.info("before layer {}__{}".format(torch.min(out), torch.max(out)))
         for i in range(self.num_layers):
             out = self.transformer_local[i](out, out, 1 - attention_mask)  # all_sents * max_tokens * dim
         out = self.layer_norm(out)
