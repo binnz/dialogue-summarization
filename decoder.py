@@ -3,7 +3,7 @@ import torch.nn as nn
 from config import Config
 from attention import SourceTargetAttention, SelfAttention
 from ffn import FFN
-from utils.logger import init_logger,hook_fn
+from utils.logger import init_logger
 
 logger = init_logger(__name__, Config.logger_path)
 
@@ -40,7 +40,6 @@ class Decoder(nn.Module):
         local_dec_feature = target_features[:, -1, :]
         #  utterance local attention
         utterance_mask = utterance_mask.squeeze(1)
-        self.register_backward_hook(hook_fn)
         utterance_output, utterance_attn_dist, utterance_coverage = self.utterance_attention(local_dec_feature, encode_features, utterance_mask, coverage)
         utter_length = len(token_features)
         assert utter_length == len(token_mask)

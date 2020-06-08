@@ -6,7 +6,7 @@ import torch.nn as nn
 import torch
 from attn import MultiHeadedAttention, MultiHeadedPooling
 from neural import PositionwiseFeedForward, PositionalEncoding, sequence_mask
-from utils.logger import init_logger,hook_fn
+from utils.logger import init_logger
 from config import Config
 
 logger = init_logger(__name__, Config.logger_path)

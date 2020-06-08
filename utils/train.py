@@ -8,7 +8,7 @@ from utils.helper import qa, dialogue, real_report
 from utils.helper import save_config
 from config import Config
 from utils.logger import init_logger
-from utils.logger import hook_fn,check_tensor,get_all_layers,logger_var
+from utils.logger import check_tensor,get_all_layers,logger_var
 logger = init_logger(__name__, Config.logger_path)
 
 start=1688
