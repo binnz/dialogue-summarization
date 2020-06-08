@@ -66,9 +66,7 @@ class TransformerPoolingLayer(nn.Module):
         out = self.dropout(context)
 
         return self.feed_forward(out)
-def hook_fn(m, i, o):
-        logger = init_logger('grad', './data-dev/grad.log')
-        logger.info("module_ff {}{}{}".format(m,i,o))
+
 class TransformerEncoder(nn.Module):
     def __init__(self, num_layers, d_model, heads, d_ff,
                  dropout, max_utter_num_length, utter_type, embeddings):
@@ -95,7 +93,6 @@ class TransformerEncoder(nn.Module):
         logger.info("before emb {}__{}".format(torch.min(self.utterance_emb.weight), torch.max(self.utterance_emb.weight)))
         out = self.pos_emb(src)
         utter_emb = self.utterance_emb(utter_type)
-        self.utterance_emb.register_backward_hook(hook_fn)
         out = out + utter_emb
         out = self.emb_layerNorm(out)
         out = self.emb_dropout(out)
