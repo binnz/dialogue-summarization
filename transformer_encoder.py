@@ -6,7 +6,7 @@ import torch.nn as nn
 import torch
 from attn import MultiHeadedAttention, MultiHeadedPooling
 from neural import PositionwiseFeedForward, PositionalEncoding, sequence_mask
-from utils.logger import init_logger
+from utils.logger import init_logger,hook_fn
 from config import Config
 
 logger = init_logger(__name__, Config.logger_path)
@@ -90,7 +90,6 @@ class TransformerEncoder(nn.Module):
         src = src[:, :self.max_length, :]
         attention_mask = attention_mask[:, :self.max_length]
         utter_type = utter_type[:, :self.max_length]
-        logger.info("before emb {}__{}".format(torch.min(self.utterance_emb.weight), torch.max(self.utterance_emb.weight)))
         out = self.pos_emb(src)
         utter_emb = self.utterance_emb(utter_type)
         out = out + utter_emb
