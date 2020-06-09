@@ -3,7 +3,7 @@ import torch.nn as nn
 from config import Config
 from attention import SourceTargetAttention, SelfAttention
 from ffn import FFN
-from utils.logger import init_logger
+from utils.logger import init_logger,logger_var
 
 logger = init_logger(__name__, './data/weight.log')
 
@@ -31,6 +31,7 @@ class Decoder(nn.Module):
 
     def forward(self, target_features, target_mask, encode_features,
                          utterance_mask, token_features, token_mask, coverage, token_coverage):
+        logger.info("encoder out2{}".format(self.out2.weight.grad))
         utterance_mask = utterance_mask.unsqueeze(-2)
         batch_size, _, _ = target_features.shape
         # note that memory is passed through encoder
@@ -104,7 +105,6 @@ class LocalAttention(nn.Module):
         normalization_factor = attn_dist_.sum(1, keepdim=True)
         normalization_factor[normalization_factor == 0] = 1.0
         attn_dist = attn_dist_ / normalization_factor
-        assert not torch.any(torch.isnan(attn_dist))
         encode_features = encode_features.view(b, t_k, e_dim)
         attn_dist = attn_dist.unsqueeze(1)  # B x 1 x t_k
         output = torch.bmm(attn_dist, encode_features)  # B x 1 x n

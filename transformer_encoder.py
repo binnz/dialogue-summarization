@@ -96,6 +96,7 @@ class TransformerEncoder(nn.Module):
         out = self.emb_layerNorm(out)
         out = self.emb_dropout(out)
         logger.info("utter emb weight {}_{}".format(torch.min(self.utterance_emb.weight),torch.max(self.utterance_emb.weight)))
+        logger.info("utter emb{}".format(self.utterance_emb.weight.grad))
         for i in range(self.num_layers):
             out = self.transformer_local[i](out, out, 1 - attention_mask)  # all_sents * max_tokens * dim
         out = self.layer_norm(out)

@@ -10,7 +10,7 @@ from utils import (DialogDataset, one_cycle, make_train_data_from_txt,
 from model import build_model
 if __name__ == '__main__':
     logging.info('*** Initializing ***')
-
+    torch.autograd.set_detect_anomaly(True)
     if not os.path.isdir(Config.data_dir):
         os.mkdir(Config.data_dir)
 
