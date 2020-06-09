@@ -18,14 +18,14 @@ class Config:
     is_coverage = True
     pointer_gen = True
     # train
-    seed = 123
+    seed = 4027
     device = 'cpu' if local else 'cuda'
     use_pickle = True
     data_dir = './data-dev' if local else './data'
     train_data_path = f'{data_dir}/AutoMaster_TrainSet.csv'
     predict_data_path = f'{data_dir}/AutoMaster_TestSet.csv'
     predict_output = 'prediction_result'
-    learning_rate = 1e-2
+    learning_rate = 4e-3
     fn = 'ckpt'
     load = False
     pickle_path = f'{data_dir}/train_data.pkl'
