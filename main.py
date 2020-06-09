@@ -8,7 +8,6 @@ from transformers import BertTokenizer, get_linear_schedule_with_warmup, AdamW
 from utils import (DialogDataset, one_cycle, make_train_data_from_txt,
                    seed_everything, BalancedDataLoader)
 from model import build_model
-from utils.logger import check_model
 if __name__ == '__main__':
     logging.info('*** Initializing ***')
 
@@ -55,7 +54,6 @@ if __name__ == '__main__':
 
     if Config.load:
         state_dict = torch.load(f'{Config.data_dir}/{Config.fn}.pth', map_location=device)
-        check_model(state_dict)
         start_epoch = 0
         print(f'Start Epoch: {start_epoch}')
         model.load_state_dict(state_dict['model'], strict=False)

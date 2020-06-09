@@ -14,7 +14,7 @@ class Config:
     max_decode_output_length = 256
     utter_type = 3
     vocab_size = 21128
-    max_grad_norm = 10.0
+    max_grad_norm = 1.0
     is_coverage = True
     pointer_gen = True
     # train
@@ -25,19 +25,19 @@ class Config:
     train_data_path = f'{data_dir}/AutoMaster_TrainSet.csv'
     predict_data_path = f'{data_dir}/AutoMaster_TestSet.csv'
     predict_output = 'prediction_result'
-    learning_rate = 1e-3
+    learning_rate = 1e-2
     fn = 'ckpt'
-    load = True
+    load = False
     pickle_path = f'{data_dir}/train_data.pkl'
     predict_pickle_path = f'{data_dir}/predict_data.pkl'
     betas = (0.9, 0.98)
-    gradient_accumulation_steps = 1
-    weight_decay = 0.1
+    gradient_accumulation_steps = 8
+    weight_decay = 0.0001
     adam_epsilon = 1e-8
-    warmup_steps = 4000
+    warmup_steps = 1000
     local_rank = -1
     batch_size = 1
     beam_size = 5
-    cov_loss_wt = 0.8
+    cov_loss_wt = 1.0
     eps = 1e-12
     logger_path = f'{data_dir}/all.log'

@@ -8,11 +8,12 @@ from utils.helper import qa, dialogue, real_report
 from utils.helper import save_config
 from config import Config
 from utils.logger import init_logger
-from utils.logger import check_tensor,get_all_layers,logger_var
+from utils.logger import check_tensor, logger_var
 logger = init_logger(__name__, Config.logger_path)
+loss_logger = init_logger('loss_logger', './data/loss.log')
+lr_logger = init_logger('lr_logger', './data/lr.log')
 
-start=1688
-end=1698
+
 def one_cycle(epoch, config, model, optimizer, scheduler, data_loader,
               tokenizer, device):
     model.train()
@@ -23,24 +24,23 @@ def one_cycle(epoch, config, model, optimizer, scheduler, data_loader,
 
             loss = train_one_batch(i, batch, model, config)
             loss = loss / config.gradient_accumulation_steps
-            logger.info("C step:{}.step {}".format(i, loss))
             loss.backward()
-            if i in range(start,end):
-                get_all_layers(model)
             print("Loss", loss.item())
             if (i + 1) % config.gradient_accumulation_steps == 0:
+                loss_logger.info("Loss. step:{}_loss: {}".format(i, loss))
                 clip_grad_norm_(model.parameters(), config.max_grad_norm)
                 optimizer.step()
                 scheduler.step()
                 optimizer.zero_grad()
                 for param_group in optimizer.param_groups:
-                    logger.info('step lr {}_{}'.format(i,param_group['lr']))
+                    lr_logger.info('step lr {}_{}'.format(i,param_group['lr']))
             pbar.update(1)
             torch.cuda.empty_cache()
             pbar.set_postfix_str(f'Loss: {loss.item():.5f}')
             if i % 100 == 0 and i != 0:
-                s = len(data_loader)//16
+                s = len(data_loader)//32
                 st = i//s
+                print("Next new save file step", (st+1) * s)
                 torch.save({
                     'epoch': epoch,
                     'model': model.state_dict(),
@@ -71,21 +71,7 @@ def train_one_batch(i, batch, model, config):
     utter_type = batch.utter_type
     target_len = batch.target_len
     target_y = batch.target_y
-    check_tensor(source,model)
-    if i in range(start,end):
-        logger_var("INput source{}", source)
-        logger_var("INput source_mask{}",source_mask)
-        logger_var("INput target{}",target)
-        logger_var("INput target_mask{}",target_mask)
-        logger_var("INput utter_type{}",utter_type)
-        logger_var("INput target_len{}",target_len)
-        logger_var("INput target_y{}",target_y)
     src_features, utterance_mask, token_features, token_mask = model.encode(source, source_mask, utter_type)
-    if i in range(start,end):
-        logger_var("encoder out src_features{}",src_features)
-        logger_var("encoder out utterance_mask{}",utterance_mask)
-        logger_var("encoder out token_features{}",token_features)
-        logger_var("encoder out token_mask{}",token_mask)
 
     max_target_len = max(target_len)
     assert len(max_target_len[max_target_len == 0]) == 0
@@ -97,24 +83,7 @@ def train_one_batch(i, batch, model, config):
         local_target = target[:, :di+1]
         l_target_mask = target_mask[:, di, :di+1]
         l_target_mask = l_target_mask.unsqueeze(-1)
-        check_tensor(src_features,model)
-        check_tensor(token_features,model)
-        check_tensor(coverage,model)
-        check_tensor(token_coverage,model)
-        if i in range(start,end):
-            logger_var("index_1",index_1)
-            logger_var("local_target",local_target)
-            logger_var("l_target_mask",l_target_mask)
-
         vocab_dist, tgt_attn_dist, p_gen, next_cov, next_tok_cov, tok_utter_index = model.decode(local_target, l_target_mask, src_features, utterance_mask, token_features, token_mask, coverage, token_coverage)
-        if i in range(start,end):
-            logger_var("vocab_dist",vocab_dist)
-            logger_var("tgt_attn_dist",tgt_attn_dist)
-            logger_var("p_gen",p_gen)
-            logger_var("next_cov",next_cov)
-            logger_var("next_tok_cov",next_tok_cov)
-            logger_var("tok_utter_index",tok_utter_index)
-
         if config.pointer_gen:
             vocab_dist_ = p_gen * vocab_dist
             attn_dist_ = (1 - p_gen) * tgt_attn_dist
@@ -122,14 +91,10 @@ def train_one_batch(i, batch, model, config):
             final_dist = vocab_dist_.scatter_add(1, token_attn_indices, attn_dist_)
         else:
             final_dist = vocab_dist
-        if i in range(start,end):
-            logger_var("final_dist",final_dist)
         real_target = target_y[:, di]
         target_1 = real_target.unsqueeze(1)
         glob_prob = torch.gather(final_dist, 1, target_1)
         glob_prob_ = glob_prob.squeeze()
-        if i in range(start,end):
-            logger_var("glob_prob",glob_prob)
         step_loss = -torch.log(glob_prob_ + config.eps)
         if config.is_coverage:
             tgt_cov = token_coverage[tok_utter_index, index_1, :]
@@ -141,9 +106,11 @@ def train_one_batch(i, batch, model, config):
         step_mask = target_mask[:, di, di]
         step_loss = step_loss * step_mask
         step_losses.append(step_loss)
-
+    logger_var('step_loss', i, step_loss)
+    logger_var('step_cov_loss', i, step_coverage_loss)
     sum_loss_11 = torch.stack(step_losses, 1)
     sum_losses = torch.sum(sum_loss_11, 1)
     batch_avg_loss = sum_losses/target_len
+    logger_var('batch_avg_loss', i, batch_avg_loss)
     loss = torch.mean(batch_avg_loss)
     return loss

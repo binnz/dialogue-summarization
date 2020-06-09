@@ -22,7 +22,7 @@ def init_logger(logger_name, logging_path):
 
 def hook_fn(m, i, o):
   logger = init_logger('grad', './data/grad.log')
-  logger.info("HahaModel: {} hahaInput: {} hahaOutput: {}".format(m,i,o))
+  logger.info("HahaModel:  hahaInput: {}_{} hahaOutput: {}_{}".format(m,i,o))
 
 def get_all_layers(net):
   for name, layer in net._modules.items():
@@ -33,29 +33,20 @@ def get_all_layers(net):
 
 def check_model(state_dict):
     for k,v in state_dict.items():
-        if isinstance(v, dict):
+        if k=='token_encoder':
+            continue
+        elif isinstance(v, dict):
             check_model(v)
         elif isinstance(v,torch.Tensor):
             if torch.any(torch.isnan(v)):
                 print("happen nan", k)
-                break
-def check_tensor(t,model):
-    if torch.any(torch.isnan(t)):
-        get_all_layers(model)
-        torch.save({
-                    'epoch': 0,
-                    'model': model.state_dict()
-                }, f'{Config.data_dir}/{Config.fn}_error.pth')
+def check_tensor(t):
     assert not torch.any(torch.isnan(t))
-    if torch.any(torch.isinf(t)):
-        torch.save({
-                    'epoch': 0,
-                    'model': model.state_dict()
-                }, f'{Config.data_dir}/{Config.fn}_error.pth')
     assert not torch.any(torch.isinf(t))
 
+def is_t_nan(var):
+    return  torch.any(torch.isnan(var)) or torch.any(torch.isnan(var))
 
-Mylogger = init_logger('logger_var', './data/all.log')
-def logger_var(name, var):
-        Mylogger.info("{}: {}".format(name,var))
-        Mylogger.info("{}: {}__{}".format(name, torch.min(var),torch.max(var)))
+Mylogger = init_logger('logger_var', './data/var.log')
+def logger_var(name, step, var):
+        Mylogger.info("{}_{}: {}__{}".format(step, name, torch.min(var), torch.max(var)))

@@ -1,15 +1,14 @@
 """
 Implementation of "Attention is All You Need"
 """
-import math
-import torch.nn as nn
 import torch
+import torch.nn as nn
 from attn import MultiHeadedAttention, MultiHeadedPooling
 from neural import PositionwiseFeedForward, PositionalEncoding, sequence_mask
-from utils.logger import init_logger
+from utils.logger import init_logger, is_t_nan, hook_fn, get_all_layers
 from config import Config
 
-logger = init_logger(__name__, Config.logger_path)
+logger = init_logger(__name__, './data/weight.log')
 
 
 class TransformerEncoderLayer(nn.Module):
@@ -84,9 +83,10 @@ class TransformerEncoder(nn.Module):
              for _ in range(num_layers)])
         self.layer_norm = nn.LayerNorm(d_model, eps=1e-6)
 
-
     def forward(self, src, attention_mask, utter_type, lengths=None):
         """ See :obj:`EncoderBase.forward()`"""
+        if is_t_nan(self.utterance_emb.weight):
+            self.utterance_emb.register_backward_hook(hook_fn)
         src = src[:, :self.max_length, :]
         attention_mask = attention_mask[:, :self.max_length]
         utter_type = utter_type[:, :self.max_length]
@@ -95,6 +95,7 @@ class TransformerEncoder(nn.Module):
         out = out + utter_emb
         out = self.emb_layerNorm(out)
         out = self.emb_dropout(out)
+        logger.info("utter emb weight {}_{}".format(torch.min(self.utterance_emb.weight),torch.max(self.utterance_emb.weight)))
         for i in range(self.num_layers):
             out = self.transformer_local[i](out, out, 1 - attention_mask)  # all_sents * max_tokens * dim
         out = self.layer_norm(out)

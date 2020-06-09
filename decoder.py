@@ -5,7 +5,7 @@ from attention import SourceTargetAttention, SelfAttention
 from ffn import FFN
 from utils.logger import init_logger
 
-logger = init_logger(__name__, Config.logger_path)
+logger = init_logger(__name__, './data/weight.log')
 
 
 def build_decoder(num_layer=6, heads=8, d_model=512, d_ff=2048, drop_rate=0.1):
@@ -104,7 +104,7 @@ class LocalAttention(nn.Module):
         normalization_factor = attn_dist_.sum(1, keepdim=True)
         normalization_factor[normalization_factor == 0] = 1.0
         attn_dist = attn_dist_ / normalization_factor
-
+        assert not torch.any(torch.isnan(attn_dist))
         encode_features = encode_features.view(b, t_k, e_dim)
         attn_dist = attn_dist.unsqueeze(1)  # B x 1 x t_k
         output = torch.bmm(attn_dist, encode_features)  # B x 1 x n
