@@ -4,7 +4,7 @@ import pickle
 import torch
 
 from config import Config
-from transformers import BertTokenizer, get_linear_schedule_with_warmup, AdamW
+from transformers import BertTokenizer, get_cosine_schedule_with_warmup, AdamW
 from utils import (DialogDataset, one_cycle, make_train_data_from_txt,
                    seed_everything, BalancedDataLoader)
 from model import build_model
@@ -47,7 +47,7 @@ if __name__ == '__main__':
         {"params": [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay) and p.requires_grad], "weight_decay": 0.0},
     ]
     optimizer = AdamW(optimizer_grouped_parameters, lr=Config.learning_rate, eps=Config.adam_epsilon)
-    scheduler = get_linear_schedule_with_warmup(
+    scheduler = get_cosine_schedule_with_warmup(
         optimizer, num_warmup_steps=Config.warmup_steps, num_training_steps=t_total
     )
 

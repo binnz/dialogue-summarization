@@ -31,7 +31,6 @@ class Decoder(nn.Module):
 
     def forward(self, target_features, target_mask, encode_features,
                          utterance_mask, token_features, token_mask, coverage, token_coverage):
-        logger.info("encoder out2{}".format(self.out2.weight.grad))
         utterance_mask = utterance_mask.unsqueeze(-2)
         batch_size, _, _ = target_features.shape
         # note that memory is passed through encoder

@@ -6,8 +6,8 @@ class Config:
     num_train_epochs = 1
     dim_model = 768
     num_heads = 8
-    dim_ff = 1024
-    dropout = 0.1
+    dim_ff = 3072
+    dropout = 0.5
     num_layers = 3
     max_src_num_length = 128
     max_utter_num_length = 128
@@ -18,6 +18,7 @@ class Config:
     is_coverage = True
     pointer_gen = True
     # train
+    #   dropout0.3 cover-weight 2
     seed = 4027
     device = 'cpu' if local else 'cuda'
     use_pickle = True
@@ -30,7 +31,7 @@ class Config:
     load = False
     pickle_path = f'{data_dir}/train_data.pkl'
     predict_pickle_path = f'{data_dir}/predict_data.pkl'
-    betas = (0.9, 0.98)
+    betas = (0.9, 0.99)
     gradient_accumulation_steps = 8
     weight_decay = 0.0001
     adam_epsilon = 1e-8
@@ -38,6 +39,6 @@ class Config:
     local_rank = -1
     batch_size = 1
     beam_size = 5
-    cov_loss_wt = 1.0
+    cov_loss_wt = 2.0
     eps = 1e-12
     logger_path = f'{data_dir}/all.log'
