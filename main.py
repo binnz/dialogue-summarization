@@ -48,7 +48,7 @@ if __name__ == '__main__':
     ]
     optimizer = AdamW(optimizer_grouped_parameters, lr=Config.learning_rate, eps=Config.adam_epsilon)
     scheduler = get_cosine_schedule_with_warmup(
-        optimizer, num_warmup_steps=Config.warmup_steps, num_training_steps=t_total
+        optimizer, num_warmup_steps=t_total*0.2, num_training_steps=t_total
     )
 
     if Config.load:
