@@ -2,7 +2,7 @@
 .vscode/
 __pycache__/
 data-dev/
-data/
+data1/
 tensorboard_logs/
 !/data/AutoMaster_TestSet.csv
 !/data/AutoMaster_TrainSet.csv
